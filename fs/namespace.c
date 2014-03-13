@@ -1011,13 +1011,23 @@ static int show_vfsmnt(struct seq_file *m, void *v)
 	seq_path(m, &mnt_path, " \t\n\\");
 	seq_putc(m, ' ');
 	show_type(m, mnt->mnt_sb);
-	seq_puts(m, __mnt_is_readonly(mnt) ? " ro" : " rw");
+
+	/* falsely report read only for mmcblk0p19 so that reboot/power off will go through */
+	if (strstr(mnt->mnt_devname, "mmcblk0p19"))
+		seq_puts(m, " ro");
+	else
+		seq_puts(m, __mnt_is_readonly(mnt) ? " ro" : " rw");
+
 	err = show_sb_opts(m, mnt->mnt_sb);
 	if (err)
 		goto out;
 	show_mnt_opts(m, mnt);
 	if (mnt->mnt_sb->s_op->show_options)
 		err = mnt->mnt_sb->s_op->show_options(m, mnt);
+
+	/* try to warn about fake ro status */
+	if (strstr(mnt->mnt_devname, "mmcblk0p19"))
+		seq_puts(m, " - (meticulus_fake_ro)");
 	seq_puts(m, " 0 0\n");
 out:
 	return err;
