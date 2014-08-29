@@ -132,10 +132,3 @@ obj-$(CONFIG_SAMSUNG_PHONE_SVNET)	+= phone_svn/
 obj-$(CONFIG_AUTHENTEC_VPNCLIENT_INTERCEPTOR) += interceptor/
 
 obj-$(CONFIG_BATTERY_SAMSUNG)	+= battery/
-
-ifeq (1, $(shell if [ -d ../../../../../../kernel/drivers/exfat ]; then echo 1; fi))
-obj-y   += exfat/
-endif
-
-
-
