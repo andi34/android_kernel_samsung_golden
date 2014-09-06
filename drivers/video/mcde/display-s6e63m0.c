@@ -24,6 +24,7 @@
 
 #include <linux/wait.h>
 #include <linux/fb.h>
+#include <linux/err.h>
 #include <linux/delay.h>
 #include <linux/gpio.h>
 #include <linux/spi/spi.h>
@@ -84,7 +85,7 @@
 #define DPI_DISP_TRACE	dev_dbg(&ddev->dev, "%s\n", __func__)
 
 /* to be removed when display works */
-//#define dev_dbg	dev_info
+/* #define dev_dbg dev_info */
 
 extern unsigned int system_rev;
 
@@ -92,7 +93,8 @@ struct s6e63m0 {
 	struct device			*dev;
 	struct spi_device		*spi;
 	struct mutex			lock;
-	unsigned int			beforepower;
+	struct mutex 			lcd_lock;
+ 	struct mutex 			pwr_lock;
 	unsigned int			power;
 	unsigned int			current_gamma_mode;
 	unsigned int			current_brightness;
@@ -102,16 +104,18 @@ struct s6e63m0 {
 	unsigned int			ldi_state;
 	unsigned int			acl_enable;
 	unsigned int			cur_acl;
-	unsigned char				panel_id;
+	unsigned char 			panel_id;
+	unsigned int 			auto_brightness;
+ 	bool 				justStarted;
 	enum mcde_display_rotation	rotation;	
-	struct mcde_display_device	*mdd;
-	struct lcd_device			*ld;
+	struct mcde_display_device 	*ddev;
+	struct lcd_device 		*ld;
 	struct backlight_device		*bd;
 	struct ssg_dpi_display_platform_data	*pd;
 	struct spi_driver		spi_drv;
 	unsigned int			elvss_ref;
 #ifdef CONFIG_HAS_EARLYSUSPEND
-	struct early_suspend			earlysuspend;
+	struct early_suspend		earlysuspend;
 #endif
 
 #ifdef SMART_DIMMING
@@ -127,6 +131,22 @@ struct ux500_pins *dpi_pins;
 #define ELVSS_MAX    0x28
 const int ELVSS_OFFSET[] = {0x0, 0x07, 0x09, 0x0D};
 #define SMART_MTP_PANEL_ID 0xa4
+
+static int get_gamma_value_from_bl(int bl);
+static int s6e63m0_set_brightness(struct backlight_device *bd);
+#ifdef CONFIG_HAS_EARLYSUSPEND
+static void s6e63m0_mcde_panel_early_suspend(struct early_suspend
+								*earlysuspend);
+static void s6e63m0_mcde_panel_late_resume(struct early_suspend
+								*earlysuspend);
+#endif
+static int s6e63m0_power_on(struct s6e63m0 *lcd);
+static int s6e63m0_power_off(struct s6e63m0 *lcd);
+static int s6e63m0_ldi_disable(struct s6e63m0 *lcd);
+static int s6e63m0_ldi_enable(struct s6e63m0 *lcd);
+static int s6e63m0_set_power_mode(struct mcde_display_device *ddev,
+ 	enum mcde_display_power_mode power_mode);
+static int update_brightness(struct s6e63m0 *lcd, u8 force);
 
 #ifdef SMART_DIMMING
 #define LDI_MTP_LENGTH 21
@@ -586,8 +606,8 @@ static int try_video_mode(
                 video_mode->vfp = 28;//26;
 		video_mode->interlaced = false;
 		/* +445681 display padding */
-		video_mode->xres_padding = 0;
-		video_mode->yres_padding = 0;
+		video_mode->xres_padding = ddev->x_res_padding;
+		video_mode->yres_padding = ddev->y_res_padding;
 		/* -445681 display padding */
 		
 		/*
@@ -858,7 +878,7 @@ void spi_3wire_gpio_enable(unsigned char enable)
 {
 	if (enable) {
 		nmk_config_pins(janice_spi_3wire_pins_enable,
-			ARRAY_SIZE(janice_spi_3wire_pins_enable));
+				ARRAY_SIZE(janice_spi_3wire_pins_enable));
 	}
 }
 
@@ -1025,7 +1045,7 @@ unsigned short *Gen_gamma_table(struct s6e63m0 *lcd)
 	}
 
 	/* for debug */
-	#if 1
+	#if 0
 		printk("%s lcd->bl : %d ",__func__,lcd->bl);
 		for(i=3;i<((gen_table_max*2)+3);i+=2) {
 			printk("0x%x ",s6e63m0_22_gamma_table[i]);
@@ -1199,7 +1219,7 @@ static int s6e63m0_set_rotation(struct mcde_display_device *ddev,
 	enum mcde_hw_rotation final_hw_rot;
 
 	final = (360 + rotation - ddev->orientation) % 360;
-//	printk("s6e63m0_set_rotation is FINAL =[%d]",final);
+
 	switch (final) {
 	case MCDE_DISPLAY_ROT_180:	/* handled by LDI */
 	case MCDE_DISPLAY_ROT_0:
@@ -1214,11 +1234,9 @@ static int s6e63m0_set_rotation(struct mcde_display_device *ddev,
 	default:
 		return -EINVAL;
 	}
-//	printk("rotation =[%d]...ddev->rotation =[%d]\n",rotation,ddev->rotation);
 
 	if (rotation != ddev->rotation) {
-//		printk("FINAL =[%d]\n",final);
-		
+
 		if (final == MCDE_DISPLAY_ROT_180) {
 			if (final != lcd->rotation) {
 				ret = s6e63m0_panel_send_sequence(lcd,
@@ -1235,7 +1253,7 @@ static int s6e63m0_set_rotation(struct mcde_display_device *ddev,
 		} else {
 			ret = mcde_chnl_set_rotation(ddev->chnl_state, final_hw_rot);
 		}
-//		printk("SET ROTATION RETURN VALUE =[%d]\n",ret);
+
 		if (ret)
 			return ret;
 		dev_dbg(lcd->dev, "Display rotated %d\n", final);
@@ -1289,6 +1307,8 @@ static int s6e63m0_ldi_enable(struct s6e63m0 *lcd)
 	}
 	lcd->ldi_state = LDI_STATE_ON;
 
+	update_brightness(lcd,1);
+
 	return ret;
 }
 
@@ -1313,7 +1333,7 @@ void s6e63m0_parallel_read(struct s6e63m0 *lcd,u8 cmd, u8 *data, size_t len)
 	udelay(delay);
 	gpio_direction_output(LCD_MPU80_WRX, 0);
 	nmk_config_pins(janice_mpu80_data_line_output,
-								ARRAY_SIZE(janice_mpu80_data_line_output));
+			ARRAY_SIZE(janice_mpu80_data_line_output));
 
 	for (i = 0; i < 8; i++) {
 		gpio_direction_output(LCD_DB[i], (cmd >> i) & 1);
@@ -1328,7 +1348,7 @@ void s6e63m0_parallel_read(struct s6e63m0 *lcd,u8 cmd, u8 *data, size_t len)
 	}
 
 	nmk_config_pins(janice_mpu80_data_line_input,
-								ARRAY_SIZE(janice_mpu80_data_line_input));
+			ARRAY_SIZE(janice_mpu80_data_line_input));
 	/*1 byte dummy */
 	udelay(delay);
 	gpio_direction_output(LCD_MPU80_RDX, 0);
@@ -1353,7 +1373,7 @@ static void configure_mtp_gpios(bool enable)
 {
 	if (enable) {
 		nmk_config_pins(janice_mpu80_pins_enable,
-								ARRAY_SIZE(janice_mpu80_pins_enable));
+				ARRAY_SIZE(janice_mpu80_pins_enable));
 
 		gpio_request(169, "LCD_MPU80_RDX");
 		gpio_request(171, "LCD_MPU80_DCX");
@@ -1367,7 +1387,7 @@ static void configure_mtp_gpios(bool enable)
 		gpio_request(77, "LCD_MPU80_D7");
 	} else {
 		nmk_config_pins(janice_mpu80_pins_disable,
-								ARRAY_SIZE(janice_mpu80_pins_disable));
+				ARRAY_SIZE(janice_mpu80_pins_disable));
 
 		gpio_free(169);
 		gpio_free(171);
