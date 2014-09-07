@@ -641,7 +641,26 @@ static int nt35512_set_power_mode(struct mcde_display_device *ddev,
 		}
 		ret = dsi_dcs_write_sequence(lcd->ddev, BOE_WVGA_DCS_CMD_SEQ_EXIT_SLEEP);
 		if (ret)
-			return ret;
+			goto err;
+
+#ifdef ESD_OPERATION
+		if (gpio_get_value(lcd->pd->lcd_detect)) {
+ 			atomic_set(&lcd->esd_enable, 0);
+ 			dev_err(lcd->dev, "LCD does not appear to be attached\n");
+ 		} else {
+ 			atomic_set(&lcd->esd_enable, 1);
+ 			dev_dbg(lcd->dev, "LCD is attached\n");
+#ifdef ESD_USING_POLLING
+ 			ret = nt35512_read_checksum(lcd, &lcd->esd_checksum);
+ 			if (!ret)
+ 				dev_dbg(lcd->dev, "Initial checksum = 0x%X\n",
+ 					lcd->esd_checksum);
+ 			else
+ 				dev_info(lcd->dev, "Failed to read checksum (%d)\n",
+ 					ret);
+#endif
+ 		}
+#endif
 
 		if ((!lcd->opp_is_requested) && (lcd->pd->min_ddr_opp > 0)) {
 			if (prcmu_qos_add_requirement(PRCMU_QOS_DDR_OPP,
@@ -654,11 +673,17 @@ static int nt35512_set_power_mode(struct mcde_display_device *ddev,
 			lcd->opp_is_requested = true;
 		}
 
+		/* Flag that the backlight should be turned on after the first frame has been sent */
+		lcd->turn_on_backlight = true;
+
 		ddev->power_mode = MCDE_DISPLAY_PM_ON;
 	}
 	/* ON -> STANDBY */
 	else if (ddev->power_mode == MCDE_DISPLAY_PM_ON &&
 					power_mode <= MCDE_DISPLAY_PM_STANDBY) {
+
+		if (lcd->pd->bl_on_off)
+			 lcd->pd->bl_on_off(false);
 
 		ret = dsi_dcs_write_command(ddev, DCS_CMD_SET_DISPLAY_OFF, NULL, 0);
 		if (ret == 0) {
@@ -667,8 +692,11 @@ static int nt35512_set_power_mode(struct mcde_display_device *ddev,
 			msleep(150);
 		}
 		if (ret && (power_mode != MCDE_DISPLAY_PM_OFF))
-			return ret;
+			goto err;
 
+#ifdef ESD_OPERATION
+ 		atomic_set(&lcd->esd_enable, 0);
+#endif
 		if (lcd->opp_is_requested) {
 			prcmu_qos_remove_requirement(PRCMU_QOS_DDR_OPP, NT35512_DRIVER_NAME);
 			lcd->opp_is_requested = false;
@@ -705,13 +733,35 @@ static int nt35512_set_power_mode(struct mcde_display_device *ddev,
 		ddev->power_mode = MCDE_DISPLAY_PM_OFF;
 	}
 
-	return mcde_chnl_set_power_mode(ddev->chnl_state, ddev->power_mode);
+#ifdef ESD_OPERATION
+ 	if (atomic_read(&lcd->esd_enable)) {
+ 		irq_set_irq_type(lcd->esd_irq, IRQF_TRIGGER_RISING);
+ 		enable_irq(lcd->esd_irq);
+#ifdef ESD_TEST
+ 		mod_timer(&lcd->esd_timer, jiffies + (30*HZ));
+#elif defined(ESD_USING_POLLING)
+ 		mod_timer(&lcd->esd_timer, jiffies + msecs_to_jiffies(ESD_POLLING_TIME));
+#endif
+ 	} else {
+ 		irq_set_irq_type(lcd->esd_irq, IRQF_TRIGGER_NONE);
+ 		disable_irq_nosync(lcd->esd_irq);
+
+ 		if (!list_empty(&(lcd->esd_work.entry))) {
+ 			cancel_work_sync(&(lcd->esd_work));
+ 			dev_dbg(lcd->dev," cancel_work_sync\n");
+ 		}
+ 	}
+#endif
+ 	ret = mcde_chnl_set_power_mode(ddev->chnl_state, ddev->power_mode);
+err:
+ 	mutex_unlock(&lcd->lock);
+ 	return ret;
 }
 
 #define VFP 27	/* MCDE needs time to prepare frame when rotated 90/270 degrees */
 #define VBP 8
 #define VSW 2
-#define HFP 3
+#define HFP 8
 #define HBP 8
 #define HSW 2
 #define REFRESH_RATE 60
@@ -741,8 +791,8 @@ static int nt35512_dsi_try_video_mode(struct mcde_display_device *ddev,
 		video_mode->hsw = HSW;
 		video_mode->interlaced = false;
 		/* +445681 display padding */
-		video_mode->xres_padding = 0;
-		video_mode->yres_padding = 0;
+		video_mode->xres_padding = ddev->x_res_padding;
+		video_mode->yres_padding = ddev->y_res_padding;
 		/* -445681 display padding */
 
 		if (pixclock == 0) {
@@ -795,6 +845,10 @@ static int nt35512_dsi_set_video_mode(struct mcde_display_device *ddev,
 		channel_video_mode.xres = ddev->native_x_res;
 		channel_video_mode.yres = ddev->native_y_res;
 	}
+	/* +445681 display padding */
+	channel_video_mode.xres_padding = ddev->x_res_padding;
+	channel_video_mode.yres_padding = ddev->y_res_padding;
+	/* -445681 display padding */ 
 	ret = mcde_chnl_set_video_mode(ddev->chnl_state, &channel_video_mode);
 	if (ret < 0) {
 		dev_warn(&ddev->dev, "%s:Failed to set video mode\n", __func__);
@@ -818,7 +872,7 @@ static ssize_t lcd_type_show(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
 	char temp[20];
-	sprintf(temp, "HYDIS_NT35512\n");
+	sprintf(temp, "BOE_NT35512\n");
 	strcat(buf, temp);
 	return strlen(buf);
 }
@@ -893,10 +947,47 @@ static int __devinit nt35512_probe(struct mcde_display_device *ddev)
 
 	mutex_init(&lcd->lock);
 
-
 	ret = device_create_file(&lcd->ld->dev, &dev_attr_lcd_type);
 	if (ret < 0)
 		dev_err(&lcd->ld->dev, "failed to add sysfs entries, %d\n",
+		 			__LINE__);
+
+#ifdef ESD_OPERATION
+ 	atomic_set(&lcd->esd_enable, 0);
+ 	atomic_set(&lcd->esd_processing, 0);
+
+ 	lcd->esd_workqueue = create_singlethread_workqueue("esd_workqueue");
+ 	if (!lcd->esd_workqueue) {
+ 		dev_info(lcd->dev, "esd_workqueue create fail\n");
+ 		return 0;
+ 	}
+
+ 	INIT_WORK(&(lcd->esd_work), nt35512_esd_recovery_func);
+
+ 	gpio_request(pdata->lcd_detect, "LCD DETECT");
+ 	lcd->esd_irq = GPIO_TO_IRQ(lcd->pd->lcd_detect);
+ 	if (request_threaded_irq(lcd->esd_irq, NULL,
+ 				esd_interrupt_handler,
+ 				IRQF_TRIGGER_RISING,
+ 				"esd_interrupt", lcd)) {
+ 		dev_info(lcd->dev, "esd irq request fail\n");
+ 		free_irq(lcd->esd_irq, NULL);
+ 	}
+#ifdef ESD_TEST
+ 	setup_timer(&lcd->esd_timer, est_test_timer_func, (unsigned long)lcd);
+#elif defined(ESD_USING_POLLING)
+ 	setup_timer(&lcd->esd_timer, nt35512_esd_polling_func, (unsigned long)lcd);
+ 	INIT_WORK(&(lcd->esd_polling_work), nt35512_esd_checksum_func);
+#endif
+#endif
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+ 	lcd->earlysuspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB - 1;
+ 	lcd->earlysuspend.suspend = nt35512_dsi_early_suspend;
+ 	lcd->earlysuspend.resume = nt35512_dsi_late_resume;
+ 	register_early_suspend(&lcd->earlysuspend);
+#endif
+
 	goto out;
 
 #ifdef CONFIG_LCD_CLASS_DEVICE
@@ -925,14 +1016,16 @@ static int __devexit nt35512_remove(struct mcde_display_device *ddev)
 		gpio_direction_input(pdata->reset_gpio);
 		gpio_free(pdata->reset_gpio);
 	}
-
+#ifdef CONFIG_HAS_EARLYSUSPEND
+ 	unregister_early_suspend(&lcd->earlysuspend);
+#endif
 	kfree(lcd);
 
 	return 0;
 }
 
 
-#if !defined(CONFIG_HAS_EARLYSUSPEND) && defined(CONFIG_PM)
+//#if !defined(CONFIG_HAS_EARLYSUSPEND) && defined(CONFIG_PM)
 static int nt35512_resume(struct mcde_display_device *ddev)
 {
 	int ret;
@@ -944,8 +1037,10 @@ static int nt35512_resume(struct mcde_display_device *ddev)
 	if (ret < 0)
 		dev_warn(&ddev->dev, "%s:Failed to resume display\n"
 			, __func__);
+#if 0
 	ddev->set_synchronized_update(ddev,
 					ddev->get_synchronized_update(ddev));
+#endif
 	return ret;
 }
 
@@ -963,7 +1058,50 @@ static int nt35512_suspend(struct mcde_display_device *ddev, \
 			, __func__);
 	return ret;
 }
+//#endif
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+static void nt35512_dsi_early_suspend(
+		struct early_suspend *earlysuspend)
+{
+     int ret;
+     struct kyle_lcd_data *lcd = container_of(earlysuspend,
+						struct kyle_lcd_data,
+						earlysuspend);
+     pm_message_t dummy;
+
+     dev_dbg(&lcd->ddev->dev, "%s function entered\n", __func__);
+     nt35512_suspend(lcd->ddev, dummy);
+}
+
+static void nt35512_dsi_late_resume(
+		struct early_suspend *earlysuspend)
+{
+     struct kyle_lcd_data *lcd = container_of(earlysuspend,
+  						struct kyle_lcd_data,
+						earlysuspend);
+
+     dev_dbg(&lcd->ddev->dev, "%s function entered\n", __func__);
+     nt35512_resume(lcd->ddev);
+}
 #endif
+
+/* Power down all displays on reboot, poweroff or halt. */
+static void nt35512_dsi_shutdown(struct mcde_display_device *ddev)
+{
+	struct kyle_lcd_data *lcd = dev_get_drvdata(&ddev->dev);
+
+	dev_info(&ddev->dev, "%s\n", __func__);
+	mutex_lock(&ddev->display_lock);
+	nt35512_power(lcd, FB_BLANK_POWERDOWN);
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+	unregister_early_suspend(&lcd->earlysuspend);
+#endif
+	mutex_unlock(&ddev->display_lock);
+	dev_info(&ddev->dev, "end %s\n", __func__);
+
+};
 
 static struct mcde_display_driver nt35512_driver = {
 	.probe	= nt35512_probe,
@@ -975,6 +1113,8 @@ static struct mcde_display_driver nt35512_driver = {
 	.suspend = NULL,
 	.resume = NULL,
 #endif
+	.shutdown = nt35512_dsi_shutdown,
+
 	.driver = {
 		.name	= NT35512_DRIVER_NAME,
 	},
