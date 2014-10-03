@@ -652,7 +652,7 @@ asmlinkage void __init start_kernel(void)
 			printk(KERN_NOTICE "[LOG][ERROR] %s() log_buf_base = 0x%p\n", __FUNCTION__, log_buf_base);
 		else {
 			printk(KERN_NOTICE "[LOG] %s() log_buf_base = 0x%p, size=%ld\n", __FUNCTION__, 
-				(long unsigned int)log_buf_base, bank->size);
+				log_buf_base, bank->size);
 
 			/* irq log buffer initialize */
 			if (LOG_IRQ_BUF_SIZE < (log_buf_irq_entry_size*(log_buf_irq_entry_count+2))) {
