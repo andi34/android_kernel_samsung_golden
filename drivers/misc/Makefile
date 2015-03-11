@@ -52,6 +52,7 @@ obj-y				+= carma/
 obj-$(CONFIG_WL127X_RFKILL)	+= wl127x-rfkill.o
 obj-$(CONFIG_APANIC)		+= apanic.o
 obj-$(CONFIG_SENSORS_AK8975)	+= akm8975.o
+obj-$(CONFIG_UID_CPUTIME)	+= uid_cputime.o
 obj-$(CONFIG_STM_TRACE) 	+= stm.o
 obj-$(CONFIG_STE_TRACE_MODEM) 	+= db8500-modem-trace.o
 obj-$(CONFIG_DBX500_MLOADER) 	+= dbx500-mloader.o
