@@ -29,7 +29,7 @@
 #include <video/mcde_display-sec-dsi.h>
 
 #include "smart_mtp_s6e63m0_dsi.h"
-#include "Display-s6e63m0_dsi_param.h"
+#include "display-s6e63m0_dsi_param.h"
 /* +452052 ESD recovery for DSI video */
 #include <linux/fb.h>
 #include <video/mcde_fb.h>
@@ -596,7 +596,7 @@ static int s6e63m0_dsi_set_brightness(struct backlight_device *bd)
 	struct s6e63m0_dsi_lcd *lcd = bl_get_data(bd);
 
 	/*Protection code for  power on /off test */
-	if(lcd->ddev <= 0)
+	if((lcd->ddev <= 0) || (lcd->dev <= 0))
 		return ret;
 
 	if ((brightness < 0) ||	(brightness > bd->props.max_brightness)) {
@@ -1034,6 +1034,12 @@ static int s6e63m0_dsi_display_update(struct mcde_display_device *ddev,
 							bool tripple_buffer)
 {
 	int ret = 0;
+	
+	struct s6e63m0_dsi_lcd *lcd = dev_get_drvdata(&ddev->dev);
+
+	/*Protection code for power on /off test */
+	if((lcd->ddev <= 0) || (lcd->dev <= 0))
+		return ret;
 
 	if (ddev->power_mode != MCDE_DISPLAY_PM_ON && ddev->set_power_mode) {
 		ret = ddev->set_power_mode(ddev, MCDE_DISPLAY_PM_ON);
@@ -1448,7 +1454,7 @@ device_attribute *attr, const char *buf, size_t size)
 	int rc;
 	
 	/*Protection code for  power on /off test */
-	if(lcd->ddev <= 0)
+	if((lcd->ddev <= 0) || (lcd->dev <= 0))
 		return size;
 	
 	rc = strict_strtoul(buf, (unsigned int) 0, (unsigned long *)&value);
