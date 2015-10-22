@@ -348,7 +348,7 @@ int NCP6914_subPMIC_PowerOn(int opt)
 	int ret = 0;
 	u8 reg;
 	u8 val;
-#if ( defined(CONFIG_MACH_GAVINI) || defined(CONFIG_MACH_SEC_KYLE)|| defined(CONFIG_MACH_SEC_GOLDEN) )
+#if ( defined(CONFIG_MACH_GAVINI) || defined(CONFIG_MACH_SEC_GOLDEN) )
 	// TODO: TEMP DEBUG gareth.phillips
 	printk(KERN_INFO "-> %s", __func__);
 
@@ -367,7 +367,7 @@ int NCP6914_subPMIC_PowerOn(int opt)
 		}
 
 		reg = NCP6914_REG_LDO1_SETTINGS;
-#if (defined(CONFIG_MACH_SEC_KYLE) || defined(CONFIG_MACH_SEC_GOLDEN))
+#ifdef CONFIG_MACH_SEC_GOLDEN
 		/* set 0000 1100  LDO1 delay 0ms, 1.8V output ->
 		   1.8V, 1.3M_VDD_REG */
 		val = 0x0C;
@@ -587,7 +587,7 @@ int NCP6914_subPMIC_PowerOff(int opt)
 	int ret = 0;
 	u8 reg;
 	u8 val;
-#if (defined(CONFIG_MACH_GAVINI) || defined(CONFIG_MACH_SEC_KYLE) || defined(CONFIG_MACH_SEC_GOLDEN))
+#if (defined(CONFIG_MACH_GAVINI) || defined(CONFIG_MACH_SEC_GOLDEN))
 	gpio_set_value(gpio_power_on, 0);
 #else				/*for gavini */
 	if (opt == 0xff) {

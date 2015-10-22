@@ -1215,11 +1215,6 @@ static inline int wait_for_key_press(void)
 			key = SEC_VOL_DOWN_PRESSED;
 		else if (!gpio_get_value(VOL_UP_GOLDEN_BRINGUP))
 			key = SEC_VOL_UP_PRESSED;
-#elif defined(CONFIG_MACH_SEC_KYLE)
-		if (!gpio_get_value(KYLE_GPIO_VOL_DOWN_KEY))
-			key = SEC_VOL_DOWN_PRESSED;
-		else if (!gpio_get_value(KYLE_GPIO_VOL_UP_KEY))
-			key = SEC_VOL_UP_PRESSED;
 #else
 		key = SEC_VOL_UP_PRESSED; /* unknown board, so straight to upload */
 #endif

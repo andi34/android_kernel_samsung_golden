@@ -83,8 +83,6 @@
 
 #if defined(CONFIG_MACH_GAVINI)
 #define VERSION_LINE			"I8530XXLXXX"
-#elif defined(CONFIG_MACH_SEC_KYLE)
-#define VERSION_LINE			"kyleXXLXXX"
 #elif defined(CONFIG_MACH_SEC_GOLDEN)
 #define VERSION_LINE			"goldenXXLXXX"
 #else
