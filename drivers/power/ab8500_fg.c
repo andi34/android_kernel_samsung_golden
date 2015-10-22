@@ -1320,7 +1320,6 @@ static int ab8500_comp_fg_bat_voltage(struct ab8500_fg *di,
 	vbat = vbat / i;
 
 #if defined(CONFIG_MACH_SEC_GOLDEN) || \
-	defined(CONFIG_MACH_GAVINI) || \
 	defined(CONFIG_MACH_VENUS)
 	bat_res_comp = ab8500_fg_volt_to_resistance(di, vbat);
 #else

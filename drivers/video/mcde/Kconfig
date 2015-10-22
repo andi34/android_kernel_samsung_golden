@@ -124,20 +124,6 @@ config MCDE_DISPLAY_S6E63MN0_DPI
          ---help---
            Say Y here if you want to use LCD Panel for Janice board.
 
-config MCDE_DISPLAY_GAVINI_DPI
-         bool "DPI display driver for Godin"
-         select MCDE_DISPLAY_DPI_MAIN
-         depends on FB_MCDE && SPI && BACKLIGHT_CLASS_DEVICE
-         ---help---
-           Say Y here if you want to use LCD Panel for Godin board.
-
-config MCDE_DISPLAY_LMS397KF_DPI
-         bool "DPI display driver for Godin"
-         select MCDE_DISPLAY_DPI_MAIN
-         depends on FB_MCDE && SPI && BACKLIGHT_CLASS_DEVICE
-         ---help---
-           Say Y here if you want to use LCD Panel for gavini board.
-
 config MCDE_DISPLAY_I9060_DPI
          bool "DPI display driver for GT-I9060"
          select MCDE_DISPLAY_DPI_MAIN
