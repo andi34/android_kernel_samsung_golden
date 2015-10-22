@@ -41,9 +41,6 @@ struct sec_jack_platform_data {
 	void	(*set_micbias_state) (bool);
 	int	(*get_adc_value) (void);
 	int	(*get_det_level) (struct platform_device *pdev);
-#if defined(CONFIG_MACH_GAVINI)
-	void (*set_earspk_sel) (bool);
-#endif
 	void	(*mach_init) (struct platform_device *pdev);
 	struct 	sec_jack_zone	*zones;
 	struct 	sec_jack_buttons_zone	*buttons_zones;
