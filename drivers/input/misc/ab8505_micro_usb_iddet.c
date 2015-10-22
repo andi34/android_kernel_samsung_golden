@@ -268,7 +268,7 @@ static struct device *fsa_temp;
 
 extern int jig_smd;
 
-#if defined(CONFIG_MACH_SEC_GOLDEN) || defined(CONFIG_MACH_SEC_KYLE)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 extern int use_ab8505_iddet;
 #endif
 
@@ -3058,7 +3058,7 @@ static struct platform_driver ab8505_iddet_driver = {
 
 static int __init ab8505_iddet_init(void)
 {
-#if defined(CONFIG_MACH_SEC_GOLDEN) || defined(CONFIG_MACH_SEC_KYLE)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 	if (use_ab8505_iddet)
 		return platform_driver_register(&ab8505_iddet_driver);
 	else

@@ -14,7 +14,6 @@ mcde-objs		+= dsilink_debugfs.o
 obj-$(CONFIG_MCDE)	+= mcde.o
 
 obj-$(CONFIG_MCDE_DISPLAY_WS2401_DPI)   	+= display-ws2401_dpi.o
-obj-$(CONFIG_MCDE_DISPLAY_KYLE_DSI)			+= display-sec-HVA40WV1_dsi.o display-sec-nt35512_dsi.o
 obj-$(CONFIG_MCDE_DISPLAY_SAMSUNG_S6D16D0)	+= display-samsung_s6d16d0.o
 obj-$(CONFIG_MCDE_DISPLAY_SONY_ACX424AKP_DSI)   += display-sony_acx424akp_dsi.o
 obj-$(CONFIG_MCDE_DISPLAY_TOSHIBA_DSI2LVDS)	+= display-toshiba_dsi2lvds.o
