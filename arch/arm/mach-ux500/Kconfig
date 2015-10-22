@@ -253,10 +253,6 @@ config MACH_JANICE_CHN
 	  Supports Chinese features of Janice_chn boards. This features
 	  will be used in Power off alarm and OVP UI concept for Chinese
 	  models.
-config MACH_CODINA
-	bool "Codina"
-	help
-	  Supports Codina boards
 config MACH_SEC_KYLE
 	bool "Kyle"
 	help
