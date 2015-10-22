@@ -59,10 +59,6 @@
 #define DEBUG_LEVEL_MID	(0x494d)
 #define DEBUG_LEVEL_HIGH	(0x4948)
 
-#if defined(CONFIG_MACH_JANICE_CHN)
-extern u32 sec_lpm_bootmode;
-#endif
-
 int sec_common_init_early(void);
 
 int sec_common_init(void);

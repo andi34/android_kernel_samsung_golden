@@ -105,14 +105,7 @@ and you can find right values for PLLDIV and PWM_PERIOD_DEFAULT
 ************************************************************************************************/
 #endif
 
-#ifdef CONFIG_MACH_JANICE
-#define PWM_PLLDIV_DEFAULT		0x02
-#define PWM_FREQ_DEFAULT		0x00
-#define PWM_PERIOD_DEFAULT		0x77
-#define PWM_DUTY_DEFAULT		0x3B
-#define LDO_VOLTAGE_DEFAULT		LDO_VOLTAGE_30V
-
-#elif defined(CONFIG_MACH_GAVINI)
+#ifdef CONFIG_MACH_GAVINI
 #define PWM_PLLDIV_DEFAULT		0x02
 #define PWM_FREQ_DEFAULT		0x00
 #define PWM_PERIOD_DEFAULT		0x8C

@@ -796,8 +796,7 @@ static int ab8500_comp_fg_bat_voltage(struct ab8500_fuelgauge_info *di,
 
 	vbat = vbat / i;
 
-#if defined(CONFIG_MACH_JANICE) || \
-	defined(CONFIG_MACH_GAVINI) || \
+#if defined(CONFIG_MACH_GAVINI) || \
 	defined(CONFIG_MACH_SEC_GOLDEN) || \
 	defined(CONFIG_MACH_SEC_KYLE) || \
 	defined(CONFIG_MACH_SEC_RICCO)
@@ -3024,12 +3023,6 @@ static int __devinit ab8500_fg_probe(struct platform_device *pdev)
 
 	di->vbat_nom = get_battery_data(di).bat_info->nominal_voltage;
 
-#ifdef CONFIG_MACH_JANICE
-	if (system_rev >= JANICE_R0_2) {
-		if (!gpio_get_value(SMD_ON_JANICE_R0_2))
-			di->smd_on = 1;
-	}
-#endif
 	di->reinit_capacity = true;
 	di->init_capacity = true;
 
