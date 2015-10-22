@@ -1488,10 +1488,6 @@ geomagnetic_work(struct yas_mag_data *magdata)
     struct timeval tv;
 #endif
 
-#ifdef CONFIG_MACH_JANICE
-	geomagnetic_manual_offset();
-#endif
-
     if (hwdep_driver.measure == NULL || hwdep_driver.get_offset == NULL) {
         return time_delay_ms;
     }

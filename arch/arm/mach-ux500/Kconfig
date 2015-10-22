@@ -239,20 +239,6 @@ config MACH_GAVINI
 	bool "Gavini"
 	help
 	  Supports Gavini boards
-config MACH_JANICE
-	bool "Janice"
-	help
-	  Supports Janice boards
-config MACH_JANICE_KOR
-	bool "Janice_kor"
-	help
-	  Supports Janice_kor boards
-config MACH_JANICE_CHN
-	bool "Janice_chn"
-	help
-	  Supports Chinese features of Janice_chn boards. This features
-	  will be used in Power off alarm and OVP UI concept for Chinese
-	  models.
 config MACH_SEC_KYLE
 	bool "Kyle"
 	help
