@@ -670,12 +670,7 @@ static int __devinit immvibe_i2c_probe(struct i2c_client* client, const struct i
 	isa_data->client = client;
 	isa_data->pdata = pdata;
 
-#ifdef CONFIG_MACH_JANICE
-	if (system_rev >= JANICE_R0_3)
-		isa_data->mot_clk  = clk_get_sys("mot-pwm0", NULL);
-	else
-		isa_data->mot_clk  = clk_get_sys("mot-pwm1", NULL);
-#elif defined(CONFIG_MACH_GAVINI)
+#ifdef CONFIG_MACH_GAVINI
 	if (system_rev > GAVINI_R0_0_B)
 		isa_data->mot_clk  = clk_get_sys("mot-pwm0", NULL);
 	else

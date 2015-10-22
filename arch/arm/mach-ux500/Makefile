@@ -53,11 +53,6 @@ obj-$(CONFIG_MCDE)		+= board-mcde.o
 obj-$(CONFIG_U5500_MMIO)	+= board-u5500-mmio.o
 obj-$(CONFIG_U8500_MMIO)	+= board-sec-mmio.o
 obj-$(CONFIG_MACH_SAMSUNG_U8500)	+= board-pins-sleep-force.o board-mop500-msp.o
-obj-$(CONFIG_MACH_JANICE)		+= board-janice-pins.o board-janice.o board-janice-regulators.o \
-					    board-janice-bm.o board-janice-sdi.o
-ifeq ($(CONFIG_MACH_JANICE), y)
-board-mcde-objs			+= board-janice-mcde.o
-endif
 obj-$(CONFIG_MACH_GAVINI)		+= board-gavini-pins.o board-gavini.o board-gavini-regulators.o \
 					    board-gavini-bm.o board-gavini-sdi.o
 ifeq ($(CONFIG_MACH_GAVINI), y)

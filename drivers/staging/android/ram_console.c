@@ -336,10 +336,6 @@ static int __init ram_console_early_init(void)
 		ram_console_old_log_init_buffer);
 }
 #else
-#if defined(CONFIG_MACH_JANICE)
-#define LDI_MTP_LENGTH 21
-char mtp_data_from_boot[21];
-#endif
 static int ram_console_driver_probe(struct platform_device *pdev)
 {
 	struct resource *res = pdev->resource;
@@ -348,9 +344,6 @@ static int ram_console_driver_probe(struct platform_device *pdev)
 	void *buffer;
 	const char *bootinfo = NULL;
 	struct ram_console_platform_data *pdata = pdev->dev.platform_data;
-	#if defined(CONFIG_MACH_JANICE)
-	char *start_addr;
-	#endif
 
 	if (res == NULL || pdev->num_resources != 1 ||
 	    !(res->flags & IORESOURCE_MEM)) {
@@ -370,10 +363,6 @@ static int ram_console_driver_probe(struct platform_device *pdev)
 
 	if (pdata)
 		bootinfo = pdata->bootinfo;
-	#if defined(CONFIG_MACH_JANICE)
-	start_addr = buffer + buffer_size  -  LDI_MTP_LENGTH;
-	memcpy(mtp_data_from_boot , start_addr , LDI_MTP_LENGTH);
-	#endif
 
 	return ram_console_init(buffer, buffer_size, bootinfo, NULL/* allocate */);
 }
