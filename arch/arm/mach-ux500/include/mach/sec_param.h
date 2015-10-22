@@ -81,9 +81,7 @@
 #define FORCED_REBOOT_MODE		8	/* Forced Reboot Mode */
 #define CMDLINE_PROD			"product"
 
-#if defined(CONFIG_MACH_GAVINI)
-#define VERSION_LINE			"I8530XXLXXX"
-#elif defined(CONFIG_MACH_SEC_GOLDEN)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 #define VERSION_LINE			"goldenXXLXXX"
 #else
 #define VERSION_LINE			"I8315XXIE00"

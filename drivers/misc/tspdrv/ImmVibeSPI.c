@@ -105,14 +105,6 @@ and you can find right values for PLLDIV and PWM_PERIOD_DEFAULT
 ************************************************************************************************/
 #endif
 
-#ifdef CONFIG_MACH_GAVINI
-#define PWM_PLLDIV_DEFAULT		0x02
-#define PWM_FREQ_DEFAULT		0x00
-#define PWM_PERIOD_DEFAULT		0x8C
-#define PWM_DUTY_DEFAULT		0x46
-#define LDO_VOLTAGE_DEFAULT		LDO_VOLTAGE_27V
-#endif
-
 static VibeUInt32 g_nPWM_PLLDiv = PWM_PLLDIV_DEFAULT;
 static VibeUInt32 g_nPWM_Freq = PWM_FREQ_DEFAULT;
 static VibeUInt32 g_nPWM_Period = PWM_PERIOD_DEFAULT;
