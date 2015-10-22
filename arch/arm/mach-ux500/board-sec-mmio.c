@@ -33,7 +33,7 @@
 #define HREFV60_MMIO_XENON_CHARGE 170
 #define HREFV60_XSHUTDOWN_SECONDARY_SENSOR 140
 
-#if defined(CONFIG_MACH_SEC_GOLDEN) || defined(CONFIG_MACH_GAVINI)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 #define XSHUTDOWN_PRIMARY_SENSOR 142
 #define XSHUTDOWN_SECONDARY_SENSOR 64
 #define RESET_PRIMARY_SENSOR	149
@@ -169,28 +169,6 @@ static int mmio_clock_init(struct mmio_platform_data *pdata)
 		dev_err(pdata->dev, "Error %d getting clock 'ipi2'\n", err);
 		goto err_ipi2c_clk;
 	}
-
-#ifdef CONFIG_MACH_GAVINI
-	if (system_rev <= GAVINI_R0_0_B) {
-		extra->clk_ptr_ext[PRIMARY_CAMERA] =
-			clk_get_sys("pri-cam", NULL);
-		if (IS_ERR(extra->clk_ptr_ext[PRIMARY_CAMERA])) {
-			err = PTR_ERR(extra->clk_ptr_ext[PRIMARY_CAMERA]);
-			dev_err(pdata->dev,
-			"Error %d getting clock 'pri-cam'\n", err);
-			goto err_pri_ext_clk;
-		}
-	} else{
-		extra->clk_ptr_ext[SECONDARY_CAMERA] =
-			clk_get_sys("sec-cam", NULL);
-		if (IS_ERR(extra->clk_ptr_ext[SECONDARY_CAMERA])) {
-			err = PTR_ERR(extra->clk_ptr_ext[SECONDARY_CAMERA]);
-			dev_err(pdata->dev,
-			"Error %d getting clock 'sec-cam'\n", err);
-			goto err_sec_ext_clk;
-		}
-	}
-#else
 	extra->clk_ptr_ext[SECONDARY_CAMERA] = clk_get_sys("sec-cam", NULL);
 	if (IS_ERR(extra->clk_ptr_ext[SECONDARY_CAMERA])) {
 		err = PTR_ERR(extra->clk_ptr_ext[SECONDARY_CAMERA]);
@@ -198,7 +176,6 @@ static int mmio_clock_init(struct mmio_platform_data *pdata)
 			"Error %d getting clock 'sec-cam'\n", err);
 		goto err_sec_ext_clk;
 	}
-#endif
 
 	dev_dbg(pdata->dev , "Board %s() Exit\n", __func__);
 	return 0;
@@ -217,14 +194,7 @@ static void mmio_clock_exit(struct mmio_platform_data *pdata)
 	dev_dbg(pdata->dev , "Board %s() Enter\n", __func__);
 	clk_put(extra->clk_ptr_bml);
 	clk_put(extra->clk_ptr_ipi2c);
-#ifdef CONFIG_MACH_GAVINI
-	if (system_rev <= GAVINI_R0_0_B)
-		clk_put(extra->clk_ptr_ext[PRIMARY_CAMERA]);
-	else
-		clk_put(extra->clk_ptr_ext[SECONDARY_CAMERA]);
-#else
 	clk_put(extra->clk_ptr_ext[SECONDARY_CAMERA]);
-#endif
 	/*clk_put(extra->clk_ptr_ext[pdata->camera_slot]);*/
 }
 
@@ -429,15 +399,7 @@ static int mmio_clock_enable(struct mmio_platform_data *pdata)
 	struct mmio_board_data *extra = pdata->extra;
 	dev_dbg(pdata->dev , "Board %s() Enter\n", __func__);
 
-#ifdef CONFIG_MACH_GAVINI
-	/* Enable appropriate external clock */
-	if (system_rev <= GAVINI_R0_0_B)
-		err = clk_enable(extra->clk_ptr_ext[PRIMARY_CAMERA]);
-	else
-		err = clk_enable(extra->clk_ptr_ext[SECONDARY_CAMERA]);
-#else
 	err = clk_enable(extra->clk_ptr_ext[SECONDARY_CAMERA]);
-#endif
 	/*err = clk_enable(extra->clk_ptr_ext[pdata->camera_slot]);*/
 
 
@@ -459,14 +421,7 @@ static void mmio_clock_disable(struct mmio_platform_data *pdata)
 	struct mmio_board_data *extra = pdata->extra;
 	dev_dbg(pdata->dev , "Board %s() Enter\n", __func__);
 
-#ifdef CONFIG_MACH_GAVINI
-	if (system_rev <= GAVINI_R0_0_B)
-		clk_disable(extra->clk_ptr_ext[PRIMARY_CAMERA]);
-	else
-		clk_disable(extra->clk_ptr_ext[SECONDARY_CAMERA]);
-#else
 	clk_disable(extra->clk_ptr_ext[SECONDARY_CAMERA]);
-#endif
 	/*clk_disable(extra->clk_ptr_ext[pdata->camera_slot]);*/
 
 }

@@ -53,11 +53,6 @@ obj-$(CONFIG_MCDE)		+= board-mcde.o
 obj-$(CONFIG_U5500_MMIO)	+= board-u5500-mmio.o
 obj-$(CONFIG_U8500_MMIO)	+= board-sec-mmio.o
 obj-$(CONFIG_MACH_SAMSUNG_U8500)	+= board-pins-sleep-force.o board-mop500-msp.o
-obj-$(CONFIG_MACH_GAVINI)		+= board-gavini-pins.o board-gavini.o board-gavini-regulators.o \
-					    board-gavini-bm.o board-gavini-sdi.o
-ifeq ($(CONFIG_MACH_GAVINI), y)
-board-mcde-objs			+= board-gavini-mcde.o
-endif
 
 obj-$(CONFIG_MACH_SEC_GOLDEN)		+= board-golden-pins.o board-golden.o board-golden-regulators.o \
 					    board-golden-bm.o board-golden-battery.o board-golden-sdi.o
