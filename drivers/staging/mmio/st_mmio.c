@@ -148,20 +148,15 @@ void sec_camera_gpio_init(void)
 	gpio_request(PRIMARY_CAMERA_RESET, "PRI_CAM_RST"); /* GPIO PIN Request*/
 	gpio_request(SECONDARY_CAMERA_STBY, "SEC_CAM_STB"); /* GPIO PIN Request*/
 	gpio_request(SECONDARY_CAMERA_RESET, "SEC_CAM_RST"); /* GPIO PIN Request*/
-#if !defined(CONFIG_MACH_SEC_KYLE)
 	gpio_request(FLASH_EN, "FLASH_EN"); /* GPIO PIN Request*/
 	gpio_request(FLASH_MODE, "FLASH_MODE"); /* GPIO PIN Request*/
-#endif
 
 	gpio_set_value(PRIMARY_CAMERA_RESET, 0);
 	gpio_set_value(PRIMARY_CAMERA_STBY, 0);
 	gpio_set_value(SECONDARY_CAMERA_RESET, 0);
 	gpio_set_value(SECONDARY_CAMERA_STBY, 0);
-#if !defined(CONFIG_MACH_SEC_KYLE)
 	gpio_set_value(FLASH_EN, 0); /* GPIO PIN Request*/
 	gpio_set_value(FLASH_MODE, 0); /* GPIO PIN Request*/
-#endif
-
 }
 /* Samsung- */
 
@@ -628,96 +623,6 @@ static int mmio_cam_pwr_sensor(struct mmio_info *info, int on)
 		subPMIC_PowerOff(0x0);
 
 		mmio_cam_control_clocks(info, false);
-		info->pdata->power_disable(info->pdata);
-
-		mdelay(CLOCK_ENABLE_DELAY);
-
-		gpio_set_value(PRIMARY_CAMERA_RESET, 0);
-		gpio_set_value(PRIMARY_CAMERA_STBY, 0);
-		gpio_set_value(SECONDARY_CAMERA_RESET, 0);
-		gpio_set_value(SECONDARY_CAMERA_STBY, 0);
-	}
-
-#elif defined(CONFIG_MACH_SEC_KYLE)
-
-	if(on)
-    {
-		gpio_set_value(PRIMARY_CAMERA_RESET, 0);
-		gpio_set_value(PRIMARY_CAMERA_STBY, 0);
-		gpio_set_value(SECONDARY_CAMERA_RESET, 0);
-		gpio_set_value(SECONDARY_CAMERA_STBY, 0);
-
-		err = info->pdata->power_enable(info->pdata);
-
-		mmio_cam_control_clocks(info, false);
-
-		mdelay(CLOCK_ENABLE_DELAY);
-
-		subPMIC_PowerOn(0x0);
-
-
-		if(KYLE_ATT_R0_1 == system_rev)
-		{
-
-			if(info->pdata->camera_slot == PRIMARY_CAMERA)
-	        {
-	            SM5103_MainCamera_On(info, on);
-			}
-	        else /* Power On Sub Camera */
-	        {
-	            SM5103_SubCamera_On(info, on);
-			}
-		} else {
-
-			if(info->pdata->camera_slot == PRIMARY_CAMERA)
-	        {
-	            NCP6914_MainCamera_On(info, on);
-			}
-	        else /* Power On Sub Camera */
-	        {
-	            NCP6914_SubCamera_On(info, on);
-			}
-		}
-
-
-		/*
-		 * When switching from secondary YUV camera
-		 * to primary Raw Bayer Camera, a hang is observed without the
-		 * below delay. I2C access failure are observed while
-		 * communicating with primary camera sensor indicating camera
-		 * sensor was not powered up correctly.
-		 */
-
-		mdelay(CLOCK_ENABLE_DELAY);
-	}
-	else /* Power Off Sequence for Kyle */
-    {
-
-		if(KYLE_ATT_R0_1 == system_rev)
-		{
-			if (info->pdata->camera_slot == PRIMARY_CAMERA) /* Main Camera Power Off */
-	        {
-	           SM5103_MainCamera_Off(info, on);
-			}
-	        else /* Sub Camera Power Off */
-	        {
-	            SM5103_SubCamera_Off(info, on);
-			}
-		} else {
-			if (info->pdata->camera_slot == PRIMARY_CAMERA) /* Main Camera Power Off */
-	        {
-	           NCP6914_MainCamera_Off(info, on);
-			}
-	        else /* Sub Camera Power Off */
-	        {
-	            NCP6914_SubCamera_Off(info, on);
-			}
-
-		}
-		subPMIC_PowerOff(0x0);
-
-		mmio_cam_control_clocks(info, false);
-
 		info->pdata->power_disable(info->pdata);
 
 		mdelay(CLOCK_ENABLE_DELAY);
@@ -1237,7 +1142,7 @@ static int mmio_cam_flash_on_off(struct mmio_info *info, int set, int on)
 		gpio_set_value(FLASH_EN, 0);
 		gpio_set_value(FLASH_MODE, 0);
 	}
-#elif defined(CONFIG_MACH_SEC_GOLDEN) || defined(CONFIG_MACH_SEC_KYLE) /* RT8515 */
+#elif defined(CONFIG_MACH_SEC_GOLDEN) /* RT8515 */
     if(0 < lux_val && lux_val <= 16)  /* Flash mode -> Static Brightness */
     {
         gpio_set_value(FLASH_EN, 0);
@@ -2050,24 +1955,6 @@ static int __devinit mmio_probe(struct platform_device *pdev)
     else
     {
         dev_err(info->dev, "system_rev: %d, Could not find Camera Sub-PMIC\n", system_rev);
-    }
-
-#elif defined(CONFIG_MACH_SEC_KYLE)
-
-	if(KYLE_ATT_R0_1 == system_rev) {
-		dev_info(info->dev, "system_rev %d, SM5103 Camera Sub-PMIC\n", system_rev);
-		subPMIC_module_init = SM5103_subPMIC_module_init;
-		subPMIC_module_exit = SM5103_subPMIC_module_exit;
-		subPMIC_PowerOn 	= SM5103_subPMIC_PowerOn;
-		subPMIC_PowerOff	= SM5103_subPMIC_PowerOff;
-		subPMIC_PinOnOff	= SM5103_subPMIC_PinOnOff;
-	} else {
-		dev_info(info->dev, "system_rev %d, NCP6914 Camera Sub-PMIC\n", system_rev);
-		subPMIC_module_init = NCP6914_subPMIC_module_init;
-		subPMIC_module_exit = NCP6914_subPMIC_module_exit;
-		subPMIC_PowerOn 	= NCP6914_subPMIC_PowerOn;
-		subPMIC_PowerOff	= NCP6914_subPMIC_PowerOff;
-		subPMIC_PinOnOff	= NCP6914_subPMIC_PinOnOff;
     }
 #endif
 

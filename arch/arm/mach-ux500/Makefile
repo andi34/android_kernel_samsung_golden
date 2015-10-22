@@ -65,12 +65,6 @@ ifeq ($(CONFIG_MACH_SEC_GOLDEN), y)
 board-mcde-objs			+= board-golden-mcde.o
 endif
 
-
-obj-$(CONFIG_MACH_SEC_KYLE)	+= board-kyle-pins.o board-kyle.o board-kyle-regulators.o \
-				    board-kyle-bm.o board-kyle-battery.o board-kyle-sdi.o board-kyle-wlan.o
-ifeq ($(CONFIG_MACH_SEC_KYLE), y)
-board-mcde-objs			+= board-kyle-mcde.o
-endif
 obj-$(CONFIG_SMP)		+= platsmp.o headsmp.o
 obj-$(CONFIG_HOTPLUG_CPU)	+= hotplug.o
 obj-$(CONFIG_LOCAL_TIMERS)	+= localtimer.o
