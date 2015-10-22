@@ -12,12 +12,6 @@ extern struct class *camera_class;
 #define	GOLDEN_R0_4	105
 #endif
 
-#if defined(CONFIG_MACH_SEC_KYLE)
-#define KYLE_ATT_R0_0	1001
-#define KYLE_ATT_R0_1	1002
-
-#endif
-
 /* NCP6914 Camera Sub-PMIC */
 int  NCP6914_subPMIC_module_init(void);
 void NCP6914_subPMIC_module_exit(void);

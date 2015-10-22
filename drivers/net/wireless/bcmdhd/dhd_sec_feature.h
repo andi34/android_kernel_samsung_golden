@@ -68,11 +68,6 @@
 #define READ_MACADDR
 #endif
 
-#ifdef CONFIG_MACH_SEC_KYLE
-#undef USE_CID_CHECK
-#define READ_MACADDR
-#endif
-
 /* REGION CODE */
 
 #if (WLAN_REGION_CODE >= 100) && (WLAN_REGION_CODE < 200) /*EUR*/

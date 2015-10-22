@@ -49,9 +49,6 @@ menu "MCDE DSI displays"
 config MCDE_DISPLAY_WS2401_DSI
 	bool "Widechips WS2401 DSI display driver"
 
-config MCDE_DISPLAY_KYLE_DSI
-	bool "Novatec DSI display driver"
-
 config MCDE_DISPLAY_SAMSUNG_S6D16D0
 	bool "Samsung S6D16D0 DSI display driver"
 	---help---

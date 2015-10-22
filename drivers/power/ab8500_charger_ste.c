@@ -399,7 +399,7 @@ extern vbus_state;
 extern int micro_usb_register_notifier(struct notifier_block *nb);
 #endif
 
-#if defined(CONFIG_MACH_SEC_GOLDEN) || defined(CONFIG_MACH_SEC_KYLE)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 extern int use_ab8505_iddet;
 #endif
 
@@ -1693,7 +1693,7 @@ static int ab8500_charger_ac_en(struct ux500_charger *charger,
 		return ret;
 
 	if (enable) {
-#if defined(CONFIG_MACH_SEC_KYLE) || defined(CONFIG_MACH_SEC_GOLDEN)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 		msleep(100);
 #endif
 
@@ -4516,7 +4516,7 @@ static struct platform_driver ab8500_charger_driver = {
 static int __init ab8500_charger_init(void)
 {
 #if defined(CONFIG_INPUT_AB8505_MICRO_USB_DETECT)
-#if defined(CONFIG_MACH_SEC_GOLDEN) || defined(CONFIG_MACH_SEC_KYLE)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 	if (!use_ab8505_iddet)
 		return 0;
 
