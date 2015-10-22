@@ -228,19 +228,6 @@ static __init int setup_boot_mode(char *opt)
 
 __setup("bootmode=", setup_boot_mode);
 
-#ifdef CONFIG_MACH_GAVINI
-u32 sec_lpm_bootmode;
-EXPORT_SYMBOL(sec_lpm_bootmode);
-
-static __init int setup_lpm_boot_mode(char *opt)
-{
-	sec_lpm_bootmode = (u32) memparse(opt, &opt);
-	return 0;
-}
-
-__setup("lpm_boot=", setup_lpm_boot_mode);
-#endif
-
 u32 sec_dbug_level;
 EXPORT_SYMBOL(sec_dbug_level);
 
@@ -1205,12 +1192,7 @@ static inline int wait_for_key_press(void)
 	int key = SEC_NO_KEY_PRESSED;
 
 	do {
-#ifdef CONFIG_MACH_GAVINI
-		if (!gpio_get_value(VOL_DOWN_GAVINI_R0_0))
-			key = SEC_VOL_DOWN_PRESSED;
-		else if (!gpio_get_value(VOL_UP_GAVINI_R0_0))
-			key = SEC_VOL_UP_PRESSED;
-#elif defined(CONFIG_MACH_SEC_GOLDEN)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 		if (!gpio_get_value(VOL_DOWN_GOLDEN_BRINGUP))
 			key = SEC_VOL_DOWN_PRESSED;
 		else if (!gpio_get_value(VOL_UP_GOLDEN_BRINGUP))

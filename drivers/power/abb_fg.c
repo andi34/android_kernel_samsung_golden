@@ -46,14 +46,8 @@
 
 #define INS_CURR_TIMEOUT		(3 * HZ)
 
-#if defined(CONFIG_MACH_GAVINI)
-#define USE_COMPENSATING_VOLTAGE_SAMPLE_FOR_CHARGING
-#define FGRES				130
-#define FGRES_CH			112
-#else
 #define FGRES				130
 #define FGRES_CH			120
-#endif
 
 #define MAGIC_CODE			0x29
 #define MAGIC_CODE_RESET		0x2F
@@ -1203,14 +1197,10 @@ static int ab8500_comp_fg_bat_voltage(struct ab8500_fg *di,
 
 	di->vbat = vbat / i;
 
-#ifdef CONFIG_MACH_GAVINI
-	bat_res_comp = ab8500_fg_volt_to_resistance(di, di->vbat);
-#else
 	bat_res_comp = di->bat->bat_type[di->bat->batt_id].
 			battery_resistance +
 			di->bat->bat_type[di->bat->batt_id].
 			line_impedance;
-#endif
 	/* Use Ohms law to get the load compensated voltage */
 	vbat_comp = di->vbat - (di->inst_curr * bat_res_comp) / 1000;
 

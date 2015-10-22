@@ -520,40 +520,7 @@ static int mmio_cam_pwr_sensor(struct mmio_info *info, int on)
     /* working at MMIO_Camera.cpp */
     dev_dbg(info->dev, "mmio_cam_pwr_sensor %d\n", on);
 
-#ifdef CONFIG_MACH_GAVINI
-
-    if (on)
-    {
-        gpio_set_value(PRIMARY_CAMERA_RESET, 0);
-        gpio_set_value(PRIMARY_CAMERA_STBY, 0);
-        gpio_set_value(SECONDARY_CAMERA_RESET, 0);
-        gpio_set_value(SECONDARY_CAMERA_STBY, 0);
-
-        err = info->pdata->power_enable(info->pdata);
-
-        mmio_cam_control_clocks(info, false);
-
-        mdelay(CLOCK_ENABLE_DELAY);
-
-        subPMIC_PowerOn(0x0);
-	}
-    else /* Power Off for Gavini */
-    {
-        subPMIC_PowerOff(0x0);
-
-		mmio_cam_control_clocks(info, false);
-
-		info->pdata->power_disable(info->pdata);
-
-		mdelay(CLOCK_ENABLE_DELAY);
-
-		gpio_set_value(PRIMARY_CAMERA_RESET, 0);
-		gpio_set_value(PRIMARY_CAMERA_STBY, 0);
-		gpio_set_value(SECONDARY_CAMERA_RESET, 0);
-		gpio_set_value(SECONDARY_CAMERA_STBY, 0);
-	}
-
-#elif defined(CONFIG_MACH_SEC_GOLDEN)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 
     if(on) /* Power On For Gorden */
     {
@@ -572,21 +539,17 @@ static int mmio_cam_pwr_sensor(struct mmio_info *info, int on)
 
         if(info->pdata->camera_slot == PRIMARY_CAMERA)
         {
-#ifdef CONFIG_MACH_SEC_GOLDEN
             if(system_rev < GOLDEN_R0_4)
                 SM5103_MainCamera_On(info, on); /* Main Camera Power On */
             else
                 NCP6914_MainCamera_On(info, on);
-#endif
         }
         else
         {
-#ifdef CONFIG_MACH_SEC_GOLDEN
             if(system_rev < GOLDEN_R0_4)
                 SM5103_SubCamera_On(info, on); /* Sub Camera Power On */
             else
                 NCP6914_SubCamera_On(info, on);
-#endif
         }
 
         /*
@@ -603,21 +566,17 @@ static int mmio_cam_pwr_sensor(struct mmio_info *info, int on)
     {
         if(info->pdata->camera_slot == PRIMARY_CAMERA)
         {
-#ifdef CONFIG_MACH_SEC_GOLDEN
             if(system_rev < GOLDEN_R0_4)
                 SM5103_MainCamera_Off(info, on); /* Main Camera Off */
             else
                 NCP6914_MainCamera_Off(info, on);
-#endif
 		}
         else
         {
-#ifdef CONFIG_MACH_SEC_GOLDEN
             if(system_rev < GOLDEN_R0_4)
                 SM5103_SubCamera_Off(info, on); /* Sub Camera Off for Golden*/
             else
                 NCP6914_SubCamera_Off(info, on);
-#endif
 		}
 
 		subPMIC_PowerOff(0x0);
@@ -1089,60 +1048,7 @@ static int mmio_cam_flash_on_off(struct mmio_info *info, int set, int on)
 	int i = 0;
 	int lux_val = on;
 
-#ifdef CONFIG_MACH_GAVINI
-	if (lux_val == 100) {
-		gpio_set_value(FLASH_EN, 0);
-		for (i = lux_val; i > 1; i--) {
-			gpio_set_value(FLASH_MODE, 1);
-			udelay(1);
-			gpio_set_value(FLASH_MODE, 0);
-			udelay(1);
-		}
-		gpio_set_value(FLASH_MODE, 1);
-		msleep(2);
-	} else if (lux_val > 0 && lux_val <= 16) {  /*flash mode*/
-		gpio_set_value(FLASH_EN, 1);
-		if (lux_val >= 2) {
-			udelay(20);
-			for (i = 0; i < lux_val ; i++) {
-				gpio_set_value(FLASH_MODE, 0);
-				udelay(1);
-				gpio_set_value(FLASH_MODE, 1);
-				udelay(1);
-			}
-		}
-	} else if (lux_val > 100) {  /*movie mode*/
-		gpio_set_value(FLASH_EN, 0);
-
-		/*MAX current  * 79%( if set  3) = Flash current*/
-		for (i = 0; i < set; i++) {
-			gpio_set_value(FLASH_MODE, 0);
-			udelay(1);
-			gpio_set_value(FLASH_MODE, 1);
-			udelay(1);
-		}
-		msleep(1);
-
-		for (i = 0; i < 20; i++) { /* register 3*/
-			gpio_set_value(FLASH_MODE, 0);
-			udelay(1);
-			gpio_set_value(FLASH_MODE, 1);
-			udelay(1);
-		}
-		msleep(1);
-		/* Flash current  * ratio  = movie current*/
-		for (i = 0; i < lux_val - 100; i++) {
-			gpio_set_value(FLASH_MODE, 0);
-			udelay(1);
-			gpio_set_value(FLASH_MODE, 1);
-			udelay(1);
-		}
-
-	} else {
-		gpio_set_value(FLASH_EN, 0);
-		gpio_set_value(FLASH_MODE, 0);
-	}
-#elif defined(CONFIG_MACH_SEC_GOLDEN) /* RT8515 */
+#ifdef CONFIG_MACH_SEC_GOLDEN /* RT8515 */
     if(0 < lux_val && lux_val <= 16)  /* Flash mode -> Static Brightness */
     {
         gpio_set_value(FLASH_EN, 0);
@@ -1753,11 +1659,7 @@ rear_camera_type_show(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
       char camType[128] = {0};
-#if defined CONFIG_MACH_GAVINI
-      strncpy(camType, "SONY_ISX012_NONE\n" , 128);
-#else
       strncpy(camType, "SLSI_S5K4ECGX_NONE\n" , 128);
-#endif
 	return sprintf(buf, "%s", camType);
 }
 
@@ -1770,11 +1672,7 @@ rear_flash_enable_store(struct device *dev,
 		mmio_cam_flash_on_off(info, 3, 0);
 	} else {
 		assistive_mode = 1;
-#if defined CONFIG_MACH_GAVINI
-		mmio_cam_flash_on_off(info, 2, (100+5));
-#else
 		mmio_cam_flash_on_off(info, 3, (100+3));
-#endif
 	}
 	return size;
 }
@@ -1926,14 +1824,7 @@ static int __devinit mmio_probe(struct platform_device *pdev)
 	/*godin+ */
 
 /* Function Pointer Mapping */
-#ifdef CONFIG_MACH_GAVINI
-    dev_info(info->dev, "NCP6914 Camera Sub-PMIC\n");
-    subPMIC_module_init = NCP6914_subPMIC_module_init;
-    subPMIC_module_exit = NCP6914_subPMIC_module_exit;
-    subPMIC_PowerOn     = NCP6914_subPMIC_PowerOn;
-    subPMIC_PowerOff    = NCP6914_subPMIC_PowerOff;
-    subPMIC_PinOnOff    = NCP6914_subPMIC_PinOnOff;
-#elif defined(CONFIG_MACH_SEC_GOLDEN)
+#ifdef CONFIG_MACH_SEC_GOLDEN
     if(GOLDEN_BRINGUP <= system_rev && system_rev < GOLDEN_R0_4)
     {
         dev_info(info->dev, "system_rev %d, SM5103 Camera Sub-PMIC\n", system_rev);

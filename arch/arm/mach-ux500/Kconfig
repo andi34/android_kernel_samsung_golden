@@ -235,10 +235,6 @@ endchoice
 if MACH_SAMSUNG_U8500
 choice
 	prompt "Samsung U8500 HW"
-config MACH_GAVINI
-	bool "Gavini"
-	help
-	  Supports Gavini boards
 config MACH_SEC_GOLDEN
 	bool "Golden"
 	help

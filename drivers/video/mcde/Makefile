@@ -23,7 +23,6 @@ obj-$(CONFIG_MCDE_DISPLAY_I9060_DPI)		+= display-i9060-dpi.o
 obj-$(CONFIG_MCDE_DISPLAY_AB8500_DENC)		+= display-ab8500.o
 obj-$(CONFIG_MCDE_DISPLAY_AV8100)		+= display-av8100.o
 obj-$(CONFIG_DISPLAY_FICTIVE)			+= display-fictive.o
-obj-$(CONFIG_MCDE_DISPLAY_LMS397KF_DPI)		+= display-gavini-lms397kf.o
 obj-$(CONFIG_MCDE_DISPLAY_S6E63MN0_DPI)		+= display-s6e63m0.o smart_mtp_s6e63m0.o
 obj-$(CONFIG_MCDE_DISPLAY_S6E63M0_DSI)		+= display-s6e63m0_dsi.o smart_mtp_s6e63m0_dsi.o
 obj-$(CONFIG_MCDE_DISPLAY_LD9040_DPI)		+= display-ld9040.o
