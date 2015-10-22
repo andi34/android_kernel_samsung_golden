@@ -81,9 +81,7 @@
 #define FORCED_REBOOT_MODE		8	/* Forced Reboot Mode */
 #define CMDLINE_PROD			"product"
 
-#if defined(CONFIG_MACH_JANICE)
-#define VERSION_LINE			"I9070XXLXXX"
-#elif defined(CONFIG_MACH_GAVINI)
+#if defined(CONFIG_MACH_GAVINI)
 #define VERSION_LINE			"I8530XXLXXX"
 #elif defined(CONFIG_MACH_SEC_KYLE)
 #define VERSION_LINE			"kyleXXLXXX"
@@ -161,10 +159,6 @@ typedef struct {
 
 extern void (*sec_set_param_value) (int idx, void *value);
 extern void (*sec_get_param_value) (int idx, void *value);
-
-#if defined(CONFIG_MACH_JANICE_CHN)
-extern int alarm_en_exit;
-#endif
 
 #define USB_SEL_MASK			(1 << 0)
 #define UART_SEL_MASK			(1 << 1)

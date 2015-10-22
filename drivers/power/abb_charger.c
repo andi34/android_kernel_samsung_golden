@@ -333,12 +333,6 @@ static enum power_supply_property ab8500_charger_usb_props[] = {
 
 bool vbus_state = 0;
 EXPORT_SYMBOL(vbus_state);
-#ifdef CONFIG_MACH_JANICE
-extern void cypress_touchkey_change_thd(bool vbus_status);
-static void (*cypress_touchkey_ta_status)(bool vbus_status);
-extern void mxt224e_ts_change_vbus_state(bool vbus_status);
-static void (*mxt224e_ts_vbus_state)(bool vbus_status);
-#endif
 
 static void ab8500_charger_set_usb_connected(struct ab8500_charger *di,
 	bool connected)
@@ -2139,21 +2133,6 @@ static void ab8500_charger_tsp_vbus_notify_work(struct work_struct *work)
 {
 	struct ab8500_charger *di = container_of(work,
 		struct ab8500_charger, tsp_vbus_notify_work);
-
-#ifdef CONFIG_MACH_JANICE
-	cypress_touchkey_ta_status = cypress_touchkey_change_thd;
-	mxt224e_ts_vbus_state = mxt224e_ts_change_vbus_state;
-
-	vbus_state = (bool)ab8500_vbus_is_detected(di);
-	printk("%s, VBUS : %d\n", __func__, vbus_state);
-
-	if (cypress_touchkey_ta_status)
-		cypress_touchkey_ta_status(vbus_state);
-
-	if (mxt224e_ts_vbus_state)
-		mxt224e_ts_vbus_state(vbus_state);
-
-#endif
 }
 
 
