@@ -1735,7 +1735,7 @@ static int ab8500_charger_ac_en(struct ux500_charger *charger,
 		return ret;
 
 	if (enable) {
-#if defined(CONFIG_MACH_CODINA) || defined(CONFIG_MACH_SEC_KYLE) || defined(CONFIG_MACH_SEC_GOLDEN)
+#if defined(CONFIG_MACH_SEC_KYLE) || defined(CONFIG_MACH_SEC_GOLDEN)
 		msleep(100);
 #endif
 

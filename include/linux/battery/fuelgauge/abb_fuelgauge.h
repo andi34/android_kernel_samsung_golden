@@ -34,8 +34,7 @@
 #define FGRES_HWREV_02_CH		133
 #define FGRES_HWREV_03			121
 #define FGRES_HWREV_03_CH		120
-#elif defined(CONFIG_MACH_CODINA) || \
-	defined(CONFIG_MACH_SEC_GOLDEN) || \
+#elif defined(CONFIG_MACH_SEC_GOLDEN) || \
 	defined(CONFIG_MACH_SEC_KYLE) || \
 	defined(CONFIG_MACH_SEC_RICCO)
 #define FGRES				130

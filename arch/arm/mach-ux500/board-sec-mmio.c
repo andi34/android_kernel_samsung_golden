@@ -33,7 +33,7 @@
 #define HREFV60_MMIO_XENON_CHARGE 170
 #define HREFV60_XSHUTDOWN_SECONDARY_SENSOR 140
 
-#if defined(CONFIG_MACH_CODINA) || defined(CONFIG_MACH_JANICE) || defined(CONFIG_MACH_SEC_GOLDEN) || defined(CONFIG_MACH_GAVINI)
+#if defined(CONFIG_MACH_JANICE) || defined(CONFIG_MACH_SEC_GOLDEN) || defined(CONFIG_MACH_GAVINI)
 #define XSHUTDOWN_PRIMARY_SENSOR 142
 #define XSHUTDOWN_SECONDARY_SENSOR 64
 #define RESET_PRIMARY_SENSOR	149
@@ -220,7 +220,7 @@ static int mmio_clock_init(struct mmio_platform_data *pdata)
 			goto err_sec_ext_clk;
 		}
 	}
-#else  /* CONFIG_MACH_CODINA */
+#else
 	extra->clk_ptr_ext[SECONDARY_CAMERA] = clk_get_sys("sec-cam", NULL);
 	if (IS_ERR(extra->clk_ptr_ext[SECONDARY_CAMERA])) {
 		err = PTR_ERR(extra->clk_ptr_ext[SECONDARY_CAMERA]);
@@ -257,7 +257,7 @@ static void mmio_clock_exit(struct mmio_platform_data *pdata)
 		clk_put(extra->clk_ptr_ext[PRIMARY_CAMERA]);
 	else
 		clk_put(extra->clk_ptr_ext[SECONDARY_CAMERA]);
-#else  /*CONFIG_MACH_CODINA */
+#else
 	clk_put(extra->clk_ptr_ext[SECONDARY_CAMERA]);
 #endif
 	/*clk_put(extra->clk_ptr_ext[pdata->camera_slot]);*/
@@ -476,7 +476,7 @@ static int mmio_clock_enable(struct mmio_platform_data *pdata)
 		err = clk_enable(extra->clk_ptr_ext[PRIMARY_CAMERA]);
 	else
 		err = clk_enable(extra->clk_ptr_ext[SECONDARY_CAMERA]);
-#else  /*CONFIG_MACH_CODINA*/
+#else
 	err = clk_enable(extra->clk_ptr_ext[SECONDARY_CAMERA]);
 #endif
 	/*err = clk_enable(extra->clk_ptr_ext[pdata->camera_slot]);*/
@@ -510,7 +510,7 @@ static void mmio_clock_disable(struct mmio_platform_data *pdata)
 		clk_disable(extra->clk_ptr_ext[PRIMARY_CAMERA]);
 	else
 		clk_disable(extra->clk_ptr_ext[SECONDARY_CAMERA]);
-#else  /*CONFIG_MACH_CODINA*/
+#else
 	clk_disable(extra->clk_ptr_ext[SECONDARY_CAMERA]);
 #endif
 	/*clk_disable(extra->clk_ptr_ext[pdata->camera_slot]);*/
