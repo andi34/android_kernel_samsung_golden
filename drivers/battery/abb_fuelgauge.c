@@ -796,8 +796,7 @@ static int ab8500_comp_fg_bat_voltage(struct ab8500_fuelgauge_info *di,
 
 	vbat = vbat / i;
 
-#if defined(CONFIG_MACH_SEC_GOLDEN) || \
-	defined(CONFIG_MACH_SEC_RICCO)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 	bat_res_comp = ab8500_fg_volt_to_resistance(di, vbat);
 #else
 	bat_res_comp = get_battery_data(di).bat_info->
@@ -1108,8 +1107,7 @@ static int ab8500_fg_calc_cap_discharge_fg(struct ab8500_fuelgauge_info *di)
 	} else if (di->bat_cap.permille <= 200 &&
 		di->bat_cap.permille > 100) {
 		di->n_skip_add_sample = 3;
-#if defined(CONFIG_MACH_SEC_GOLDEN) || \
-	defined(CONFIG_MACH_SEC_RICCO)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 	} else if (di->bat_cap.permille <= 120) {
 		di->n_skip_add_sample = 1;
 	}
@@ -1629,8 +1627,7 @@ static void ab8500_fg_algorithm_discharging(struct ab8500_fuelgauge_info *di)
 
 		ab8500_fg_check_capacity_limits(di, false);
 
-#if defined(CONFIG_MACH_SEC_GOLDEN) || \
-	defined(CONFIG_MACH_SEC_RICCO)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 		if (DIV_ROUND_CLOSEST(di->bat_cap.permille, 10) <= 10) {
 			queue_delayed_work(di->fg_wq,
 				&di->fg_periodic_work,
