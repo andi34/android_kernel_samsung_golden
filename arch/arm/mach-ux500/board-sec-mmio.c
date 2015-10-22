@@ -40,11 +40,6 @@
 #define RESET_SECONDARY_SENSOR	65
 #define CAM_FLASH_EN	140
 #define CAM_FLASH_MODE	      141
-#elif defined(CONFIG_MACH_SEC_KYLE)
-#define XSHUTDOWN_PRIMARY_SENSOR 142
-#define XSHUTDOWN_SECONDARY_SENSOR 64
-#define RESET_PRIMARY_SENSOR	149
-#define RESET_SECONDARY_SENSOR	65
 #else
 #error "Unknown machine type"
 #endif
@@ -103,12 +98,7 @@ struct mmio_board_data{
 
 /* Fill names of regulators required for powering up the
  * camera sensor in below array */
-#if defined(CONFIG_MACH_SEC_KYLE)
-static char *regulator_names[] = {"vddcsi1v2"};
-#else
 static char *regulator_names[] = {"vddcsi1v2", "v_sensor_3v" , "v_sensor_1v8"};
-#endif
-
 
 /* This function is used to translate the physical GPIO used for reset GPIO
  * to logical IPGPIO that needs to be communicated to Firmware. so that

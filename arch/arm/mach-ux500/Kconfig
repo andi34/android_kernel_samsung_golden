@@ -239,10 +239,6 @@ config MACH_GAVINI
 	bool "Gavini"
 	help
 	  Supports Gavini boards
-config MACH_SEC_KYLE
-	bool "Kyle"
-	help
-	  Supports Kyle board and variants
 config MACH_SEC_GOLDEN
 	bool "Golden"
 	help
