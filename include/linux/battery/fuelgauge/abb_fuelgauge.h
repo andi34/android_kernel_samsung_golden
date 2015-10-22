@@ -29,12 +29,10 @@
 /* fg_res parameter should be re-calculated
    according to the model and HW revision */
 
-#if defined(CONFIG_MACH_SEC_GOLDEN) || \
-	defined(CONFIG_MACH_SEC_RICCO)
 #define FGRES				130
+#ifdef CONFIG_MACH_SEC_GOLDEN
 #define FGRES_CH			125
 #else
-#define FGRES				130
 #define FGRES_CH			133
 #endif
 
