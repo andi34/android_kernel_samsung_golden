@@ -547,11 +547,8 @@ static int clkout0_enable(struct clk *clk)
 	r = regulator_enable(clk->regulator);
 	if (r)
 		goto regulator_failed;
-#if defined(CONFIG_MACH_JANICE)
-	r = prcmu_config_clkout(0, PRCMU_CLKSRC_ACLK, 8);
-#else
+
 	r = prcmu_config_clkout(0, PRCMU_CLKSRC_CLK38M, 4);
-#endif
 	if (r)
 		goto config_failed;
 	r = nmk_config_pin(GPIO227_CLKOUT1, false);
@@ -560,11 +557,7 @@ static int clkout0_enable(struct clk *clk)
 	return r;
 
 gpio_failed:
-#if defined(CONFIG_MACH_JANICE)
-	(void)prcmu_config_clkout(0, PRCMU_CLKSRC_ACLK, 0);
-#else
 	(void)prcmu_config_clkout(0, PRCMU_CLKSRC_CLK38M, 0);
-#endif
 config_failed:
 	(void)regulator_disable(clk->regulator);
 regulator_failed:
@@ -578,11 +571,8 @@ static void clkout0_disable(struct clk *clk)
 	r = nmk_config_pin((GPIO227_GPIO | PIN_OUTPUT_LOW), false);
 	if (r)
 		goto disable_failed;
-#if defined(CONFIG_MACH_JANICE)
-	(void)prcmu_config_clkout(0, PRCMU_CLKSRC_ACLK, 0);
-#else
+
 	(void)prcmu_config_clkout(0, PRCMU_CLKSRC_CLK38M, 0);
-#endif
 	(void)regulator_disable(clk->regulator);
 	return;
 

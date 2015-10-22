@@ -395,13 +395,6 @@ static enum power_supply_property ab8500_charger_usb_props[] = {
 
 extern vbus_state;
 
-#ifdef CONFIG_MACH_JANICE
-extern void cypress_touchkey_change_thd(bool vbus_status);
-static void (*cypress_touchkey_ta_status)(bool vbus_status);
-extern void mxt224e_ts_change_vbus_state(bool vbus_status);
-static void (*mxt224e_ts_vbus_state)(bool vbus_status);
-#endif
-
 #if defined( CONFIG_INPUT_AB8505_MICRO_USB_DETECT )
 extern int micro_usb_register_notifier(struct notifier_block *nb);
 #endif
@@ -3013,28 +3006,6 @@ static void ab8500_charger_usb_link_status_work(struct work_struct *work)
 }
 #endif
 
-#ifdef CONFIG_MACH_JANICE
-/*TODO: Add some header*/
-static void ab8500_charger_tsp_vbus_notify_work(struct work_struct *work)
-{
-	struct ab8500_charger *di = container_of(work,
-		struct ab8500_charger, tsp_vbus_notify_work);
-
-	cypress_touchkey_ta_status = cypress_touchkey_change_thd;
-	mxt224e_ts_vbus_state = mxt224e_ts_change_vbus_state;
-
-	vbus_state = (bool)ab8500_vbus_is_detected(di);
-	printk("%s, VBUS : %d\n", __func__, vbus_state);
-
-	if (cypress_touchkey_ta_status)
-		cypress_touchkey_ta_status(vbus_state);
-
-	if (mxt224e_ts_vbus_state)
-		mxt224e_ts_vbus_state(vbus_state);
-
-}
-#endif
-
 static void ab8500_charger_usb_state_changed_work(struct work_struct *work)
 {
 	int ret;
@@ -4383,11 +4354,6 @@ static int __devinit ab8500_charger_probe(struct platform_device *pdev)
 
 	INIT_WORK(&di->usb_state_changed_work,
 		ab8500_charger_usb_state_changed_work);
-
-#ifdef CONFIG_MACH_JANICE
-	INIT_WORK(&di->tsp_vbus_notify_work,
-		ab8500_charger_tsp_vbus_notify_work);
-#endif
 
 	/* Init work for checking HW status */
 	INIT_WORK(&di->check_main_thermal_prot_work,

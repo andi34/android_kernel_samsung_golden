@@ -228,7 +228,7 @@ static __init int setup_boot_mode(char *opt)
 
 __setup("bootmode=", setup_boot_mode);
 
-#if defined(CONFIG_MACH_JANICE_CHN) || defined (CONFIG_MACH_GAVINI)
+#ifdef CONFIG_MACH_GAVINI
 u32 sec_lpm_bootmode;
 EXPORT_SYMBOL(sec_lpm_bootmode);
 
@@ -1205,12 +1205,7 @@ static inline int wait_for_key_press(void)
 	int key = SEC_NO_KEY_PRESSED;
 
 	do {
-#if defined(CONFIG_MACH_JANICE)
-		if (!gpio_get_value(VOL_DOWN_JANICE_R0_0))
-			key = SEC_VOL_DOWN_PRESSED;
-		else if (!gpio_get_value(VOL_UP_JANICE_R0_0))
-			key = SEC_VOL_UP_PRESSED;
-#elif defined(CONFIG_MACH_GAVINI)
+#ifdef CONFIG_MACH_GAVINI
 		if (!gpio_get_value(VOL_DOWN_GAVINI_R0_0))
 			key = SEC_VOL_DOWN_PRESSED;
 		else if (!gpio_get_value(VOL_UP_GAVINI_R0_0))

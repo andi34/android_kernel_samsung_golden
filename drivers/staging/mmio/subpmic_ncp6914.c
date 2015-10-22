@@ -348,7 +348,7 @@ int NCP6914_subPMIC_PowerOn(int opt)
 	int ret = 0;
 	u8 reg;
 	u8 val;
-#if ( defined(CONFIG_MACH_JANICE) || defined(CONFIG_MACH_GAVINI) || defined(CONFIG_MACH_SEC_KYLE)|| defined(CONFIG_MACH_SEC_GOLDEN) )
+#if ( defined(CONFIG_MACH_GAVINI) || defined(CONFIG_MACH_SEC_KYLE)|| defined(CONFIG_MACH_SEC_GOLDEN) )
 	// TODO: TEMP DEBUG gareth.phillips
 	printk(KERN_INFO "-> %s", __func__);
 
@@ -587,7 +587,7 @@ int NCP6914_subPMIC_PowerOff(int opt)
 	int ret = 0;
 	u8 reg;
 	u8 val;
-#if (defined(CONFIG_MACH_JANICE) || defined(CONFIG_MACH_GAVINI) || defined(CONFIG_MACH_SEC_KYLE) || defined(CONFIG_MACH_SEC_GOLDEN))
+#if (defined(CONFIG_MACH_GAVINI) || defined(CONFIG_MACH_SEC_KYLE) || defined(CONFIG_MACH_SEC_GOLDEN))
 	gpio_set_value(gpio_power_on, 0);
 #else				/*for gavini */
 	if (opt == 0xff) {
