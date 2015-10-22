@@ -1430,10 +1430,6 @@ VBUS and MUIC cannot detect cable. So charging will be disabled\n");
 	}
 
 	if (enable) {
-
-#ifdef CONFIG_MACH_CODINA
-		msleep(100);
-#endif
 		/* Check if USB is connected */
 		if (!di->usb.charger_connected) {
 			dev_err(di->dev, "USB charger not connected\n");

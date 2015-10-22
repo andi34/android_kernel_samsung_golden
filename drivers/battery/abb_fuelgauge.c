@@ -797,7 +797,6 @@ static int ab8500_comp_fg_bat_voltage(struct ab8500_fuelgauge_info *di,
 	vbat = vbat / i;
 
 #if defined(CONFIG_MACH_JANICE) || \
-	defined(CONFIG_MACH_CODINA) || \
 	defined(CONFIG_MACH_GAVINI) || \
 	defined(CONFIG_MACH_SEC_GOLDEN) || \
 	defined(CONFIG_MACH_SEC_KYLE) || \
@@ -1112,8 +1111,7 @@ static int ab8500_fg_calc_cap_discharge_fg(struct ab8500_fuelgauge_info *di)
 	} else if (di->bat_cap.permille <= 200 &&
 		di->bat_cap.permille > 100) {
 		di->n_skip_add_sample = 3;
-#if defined(CONFIG_MACH_CODINA) || \
-	defined(CONFIG_MACH_SEC_GOLDEN) || \
+#if defined(CONFIG_MACH_SEC_GOLDEN) || \
 	defined(CONFIG_MACH_SEC_KYLE) || \
 	defined(CONFIG_MACH_SEC_RICCO)
 	} else if (di->bat_cap.permille <= 120) {
@@ -1635,8 +1633,7 @@ static void ab8500_fg_algorithm_discharging(struct ab8500_fuelgauge_info *di)
 
 		ab8500_fg_check_capacity_limits(di, false);
 
-#if defined(CONFIG_MACH_CODINA) || \
-	defined(CONFIG_MACH_SEC_GOLDEN) || \
+#if defined(CONFIG_MACH_SEC_GOLDEN) || \
 	defined(CONFIG_MACH_SEC_KYLE) || \
 	defined(CONFIG_MACH_SEC_RICCO)
 		if (DIV_ROUND_CLOSEST(di->bat_cap.permille, 10) <= 10) {

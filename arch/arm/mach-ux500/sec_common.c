@@ -1215,11 +1215,6 @@ static inline int wait_for_key_press(void)
 			key = SEC_VOL_DOWN_PRESSED;
 		else if (!gpio_get_value(VOL_UP_GAVINI_R0_0))
 			key = SEC_VOL_UP_PRESSED;
-#elif defined(CONFIG_MACH_CODINA)
-		if (!gpio_get_value(VOL_DOWN_CODINA_R0_0))
-			key = SEC_VOL_DOWN_PRESSED;
-		else if (!gpio_get_value(VOL_UP_CODINA_R0_0))
-			key = SEC_VOL_UP_PRESSED;
 #elif defined(CONFIG_MACH_SEC_GOLDEN)
 		if (!gpio_get_value(VOL_DOWN_GOLDEN_BRINGUP))
 			key = SEC_VOL_DOWN_PRESSED;
