@@ -1175,7 +1175,7 @@ static ssize_t enable_store(struct device *pdev, struct device_attribute *attr,
 		usb_remove_config(cdev, &android_config_driver);
 		usb_ep_autoconfig_reset(cdev->gadget);
 		dev->enabled = false;
-#if CONFIG_USB_ANDROID_SAMSUNG_COMPOSITE
+#ifdef CONFIG_USB_ANDROID_SAMSUNG_COMPOSITE
 	} else if (!enabled) {
 		usb_gadget_disconnect(cdev->gadget);
 		dev->enabled = false;
