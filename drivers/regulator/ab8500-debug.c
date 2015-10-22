@@ -1915,16 +1915,6 @@ static struct ab8500_force_reg ab8500_force_reg[] = {
 		.mask = 0x03,
 		.val  = 0x03,
  	},
-#ifdef CONFIG_MACH_CODINA
- 	{
-		/* Vaux4Regu */
-		.name = "Vaux4Regu",
-		.bank = 0x04,
-		.addr = 0x2E,
- 		.mask = 0x03,
-		.val  = 0x03,
-	},
-#else
 	{
 		/* Vaux4Regu */
 		.name = "Vaux4Regu",
@@ -1933,7 +1923,6 @@ static struct ab8500_force_reg ab8500_force_reg[] = {
  		.mask = 0x03,
 		.val  = 0x00,
 	},
-#endif
 };
 
 static void ab8500_force_reg_update(void)

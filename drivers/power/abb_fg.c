@@ -51,10 +51,6 @@
 #define FGRES_HWREV_02_CH		133
 #define FGRES_HWREV_03			121
 #define FGRES_HWREV_03_CH		120
-#elif defined(CONFIG_MACH_CODINA)
-#define USE_COMPENSATING_VOLTAGE_SAMPLE_FOR_CHARGING
-#define FGRES				130
-#define FGRES_CH			125
 #elif defined(CONFIG_MACH_GAVINI)
 #define USE_COMPENSATING_VOLTAGE_SAMPLE_FOR_CHARGING
 #define FGRES				130
@@ -1217,7 +1213,6 @@ static int ab8500_comp_fg_bat_voltage(struct ab8500_fg *di,
 	di->vbat = vbat / i;
 
 #if defined(CONFIG_MACH_JANICE) || \
-	defined(CONFIG_MACH_CODINA) || \
 	defined(CONFIG_MACH_GAVINI)
 	bat_res_comp = ab8500_fg_volt_to_resistance(di, di->vbat);
 #else
@@ -1520,15 +1515,9 @@ static int ab8500_fg_calc_cap_discharge_fg(struct ab8500_fg *di)
 	} else if (di->bat_cap.permille <= 200 &&
 		di->bat_cap.permille > 100) {
 		di->n_skip_add_sample = 3;
-#if defined(CONFIG_MACH_CODINA)
-	} else if (di->bat_cap.permille <= 120) {
-		di->n_skip_add_sample = 1;
-	}
-#else
 	} else if (di->bat_cap.permille <= 100) {
 		di->n_skip_add_sample = 2;
 	}
-#endif
 	dev_dbg(di->dev, "Using every %d Vbat sample Now on %d loop\n",
 		di->n_skip_add_sample, di->skip_add_sample);
 
@@ -2021,14 +2010,6 @@ static void ab8500_fg_algorithm_discharging(struct ab8500_fg *di)
 		}
 
 		ab8500_fg_check_capacity_limits(di, false);
-
-#if defined(CONFIG_MACH_CODINA)
-		if (DIV_ROUND_CLOSEST(di->bat_cap.permille, 10) <= 10) {
-			queue_delayed_work(di->fg_wq,
-				&di->fg_periodic_work,
-				10 * HZ);
-		}
-#endif
 		break;
 
 	case AB8500_FG_DISCHARGE_WAKEUP:
