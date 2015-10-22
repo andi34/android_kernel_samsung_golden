@@ -51,15 +51,12 @@
 
 #define INS_CURR_TIMEOUT		(3 * HZ)
 
+#define FGRES				130
+
 #ifdef CONFIG_MACH_SEC_GOLDEN
 #define USE_COMPENSATING_VOLTAGE_SAMPLE_FOR_CHARGING
-#define FGRES				130
 #define FGRES_CH			125
-#elif defined(CONFIG_MACH_VENUS)
-#define FGRES				680
-#define FGRES_CH			680
 #else
-#define FGRES				130
 #define FGRES_CH			133
 #endif
 
@@ -1319,8 +1316,7 @@ static int ab8500_comp_fg_bat_voltage(struct ab8500_fg *di,
 
 	vbat = vbat / i;
 
-#if defined(CONFIG_MACH_SEC_GOLDEN) || \
-	defined(CONFIG_MACH_VENUS)
+#ifdef CONFIG_MACH_SEC_GOLDEN
 	bat_res_comp = ab8500_fg_volt_to_resistance(di, vbat);
 #else
 	bat_res_comp = di->bat->bat_type[di->bat->batt_id].
