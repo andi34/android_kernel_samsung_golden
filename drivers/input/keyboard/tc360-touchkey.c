@@ -144,6 +144,7 @@ struct tc360_data {
 	struct workqueue_struct		*led_wq;
 	struct work_struct		led_work;
 	u8				led_brightness;
+	bool				counting_timer;
 #if defined(SEC_FAC_TK)
 	struct fdata_struct		*fdata;
 #endif
@@ -267,12 +268,16 @@ static int sclhi(struct tc360_data *data)
 #endif
 	unsigned long start;
 	int timeout = HZ / 20;
+	int ex_count = 100000;
 
 	setscl(data, 1);
 
 	start = jiffies;
 	while (!getscl(data)) {
+		ex_count--;
 		if (time_after(jiffies, start + timeout))
+			return -ETIMEDOUT;
+		else if (data->counting_timer && ex_count < 0)
 			return -ETIMEDOUT;
 	}
 
@@ -440,7 +445,10 @@ static void isp_sp_signal(struct tc360_data *data)
 		if (i == 5)
 			udelay(30);
 	}
+	data->counting_timer = true;
 	sclhi(data);
+	data->counting_timer = false;
+
 	local_irq_restore(flags);
 }
 
@@ -816,6 +824,9 @@ verify_fw:
 
 	data->pdata->power(false);
 	msleep(TC360_POWERON_DELAY);
+
+	data->pdata->int_set_pull(true);
+
 	data->pdata->power(true);
 	msleep(TC360_POWERON_DELAY);
 
@@ -1071,7 +1082,7 @@ static int tc360_flash_fw(struct tc360_data *data, u8 fw_path, bool force)
 
 	/* firmware version compare */
 	fw_ver = tc360_get_fw_ver(data);
-	if (fw_ver == data->fw_img->first_fw_ver && !force) {
+	if (fw_ver >= data->fw_img->first_fw_ver && !force) {
 		ret = HAVE_LATEST_FW;
 		dev_info(&client->dev, "IC aleady have latest firmware (%#x)\n",
 			 fw_ver);
