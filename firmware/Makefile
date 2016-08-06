@@ -142,9 +142,6 @@ fw-shipped-$(CONFIG_USB_VICAM) += vicam/firmware.fw
 fw-shipped-$(CONFIG_VIDEO_CPIA2) += cpia2/stv0672_vp4.bin
 fw-shipped-$(CONFIG_YAM) += yam/1200.bin yam/9600.bin
 
-fw-shipped-$(CONFIG_TOUCHSCREEN_MMS136_TS) += melfas/mms136_ts.fw\
-					melfas/mms136_ts_l.fw
-
 fw-shipped-$(CONFIG_KEYBOARD_TC360_TOUCHKEY) += coreriver/tc360.fw\
 
 fw-shipped-all := $(fw-shipped-y) $(fw-shipped-m) $(fw-shipped-)
