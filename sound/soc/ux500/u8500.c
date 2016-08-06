@@ -23,22 +23,9 @@
 #include <linux/spi/spi.h>
 #include <sound/initval.h>
 
-#ifdef CONFIG_SND_SOC_UX500_AB3550
-#include "ux500_ab3550.h"
-#endif
-
 #ifdef CONFIG_SND_SOC_UX500_AB8500
 #include <sound/ux500_ab8500.h>
 #endif
-
-#ifdef CONFIG_SND_SOC_UX500_AV8100
-#include "ux500_av8100.h"
-#endif
-
-#ifdef CONFIG_SND_SOC_UX500_CG29XX
-#include "ux500_cg29xx.h"
-#endif
-
 
 static struct platform_device *u8500_platform_dev;
 
@@ -52,25 +39,6 @@ static struct platform_device ux500_pcm = {
 		},
 };
 
-#ifdef CONFIG_SND_SOC_UX500_AV8100
-static struct platform_device av8100_codec = {
-		.name = "av8100-codec",
-		.id = 0,
-		.dev = {
-			.platform_data = NULL,
-		},
-};
-#endif
-
-#ifdef CONFIG_SND_SOC_UX500_CG29XX
-static struct platform_device cg29xx_codec = {
-		.name = "cg29xx-codec",
-		.id = 0,
-		.dev = {
-			.platform_data = NULL,
-		},
-};
-#else
 int ux500_gen_msp0_hw_params(struct snd_pcm_substream *substream,
 		struct snd_pcm_hw_params *params)
 {
@@ -142,44 +110,9 @@ struct snd_soc_ops ux500_gen_msp0_ops[] = {
 		.hw_params = ux500_gen_msp0_hw_params,
 	}
 };
-#endif
 
 /* Define the whole U8500 soundcard, linking platform to the codec-drivers  */
 struct snd_soc_dai_link u8500_dai_links[] = {
-	#ifdef CONFIG_SND_SOC_UX500_AV8100
-	{
-	.name = "hdmi",
-	.stream_name = "hdmi",
-	.cpu_dai_name = "ux500-msp-i2s.2",
-	.codec_dai_name = "av8100-codec-dai",
-	.platform_name = "ux500-pcm.0",
-	.codec_name = "av8100-codec.0",
-	.init = NULL,
-	.ops = ux500_av8100_ops,
-	},
-	#endif
-	#ifdef CONFIG_SND_SOC_UX500_AB3550
-	{
-	.name = "ab3550_0",
-	.stream_name = "ab3550_0",
-	.cpu_dai_name = "ux500-msp-i2s.0",
-	.codec_dai_name = "ab3550-codec-dai.0",
-	.platform_name = "ux500-pcm.0",
-	.codec_name = "ab3550-codec.11",
-	.init = NULL,
-	.ops = ux500_ab3550_ops,
-	},
-	{
-	.name = "ab3550_1",
-	.stream_name = "ab3550_1",
-	.cpu_dai_name = "ux500-msp-i2s.1",
-	.codec_dai_name = "ab3550-codec-dai.1",
-	.platform_name = "ux500-pcm.0",
-	.codec_name = "ab3550-codec.11",
-	.init = NULL,
-	.ops = ux500_ab3550_ops,
-	},
-	#endif
 	#ifdef CONFIG_SND_SOC_UX500_AB8500
 	{
 	.name = "ab8500_0",
@@ -202,18 +135,6 @@ struct snd_soc_dai_link u8500_dai_links[] = {
 	.ops = ux500_ab8500_ops,
 	},
 	#endif
-	#ifdef CONFIG_SND_SOC_UX500_CG29XX
-	{
-	.name = "cg29xx_0",
-	.stream_name = "cg29xx_0",
-	.cpu_dai_name = "ux500-msp-i2s.0",
-	.codec_dai_name = "cg29xx-codec-dai.1",
-	.platform_name = "ux500-pcm.0",
-	.codec_name = "cg29xx-codec.0",
-	.init = NULL,
-	.ops = ux500_cg29xx_ops,
-	},
-	#else
 	{
 	.name = "msp_0",
 	.stream_name = "msp_0",
@@ -224,7 +145,6 @@ struct snd_soc_dai_link u8500_dai_links[] = {
 	.init = NULL,
 	.ops = ux500_gen_msp0_ops,
 	},
-	#endif
 };
 
 static struct snd_soc_card u8500_drvdata = {
@@ -242,18 +162,6 @@ static int __init u8500_soc_init(void)
 
 	if (machine_is_u5500())
 		return 0;
-
-	#ifdef CONFIG_SND_SOC_UX500_AV8100
-	pr_debug("%s: Register device to generate a probe for AV8100 codec.\n",
-		__func__);
-	platform_device_register(&av8100_codec);
-	#endif
-
-	#ifdef CONFIG_SND_SOC_UX500_CG29XX
-	pr_debug("%s: Register device to generate a probe for CG29xx codec.\n",
-		__func__);
-	platform_device_register(&cg29xx_codec);
-	#endif
 
 	#ifdef CONFIG_SND_SOC_UX500_AB8500
 	pr_debug("%s: Calling init-function for AB8500 machine driver.\n",
