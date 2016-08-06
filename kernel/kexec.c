@@ -1088,14 +1088,6 @@ void crash_kexec(struct pt_regs *regs)
 			machine_crash_shutdown(&fixed_regs);
 			machine_kexec(kexec_crash_image);
 		}
-#ifdef CONFIG_CRASH_SWRESET
-		else {
-			crash_setup_regs(&fixed_regs, regs);
-			crash_save_vmcoreinfo();
-			machine_crash_shutdown(&fixed_regs);
-			machine_crash_swreset();
-		}
-#endif
 		mutex_unlock(&kexec_mutex);
 	}
 }
