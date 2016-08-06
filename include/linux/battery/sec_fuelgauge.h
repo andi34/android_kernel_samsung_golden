@@ -21,16 +21,6 @@
 
 #include <linux/battery/sec_charging_common.h>
 
-#if defined(CONFIG_FUELGAUGE_DUMMY)
-#include <linux/battery/fuelgauge/dummy_fuelgauge.h>
-#elif defined(CONFIG_FUELGAUGE_MAX17042)
-#include <linux/battery/fuelgauge/max17042_fuelgauge.h>
-#elif defined(CONFIG_FUELGAUGE_MAX17048)
-#include <linux/battery/fuelgauge/max17048_fuelgauge.h>
-#elif defined(CONFIG_FUELGAUGE_MAX17050)
-#include <linux/battery/fuelgauge/max17050_fuelgauge.h>
-#endif
-
 struct sec_fuelgauge_reg_data {
 	u8 reg_addr;
 	u8 reg_data1;
