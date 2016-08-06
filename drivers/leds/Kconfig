@@ -22,13 +22,6 @@ config LEDS_CLASS
 	  This option enables the led sysfs class in /sys/class/leds.  You'll
 	  need this to do anything useful with LEDs.  If unsure, say N.
 
-config FLASH_LED_KTD267
-	depends on NEW_LEDS
-	tristate "FLASH LED KTD267 driver"
-	default n
-	help
-	  This option enables the driver for FLASH LED KTD267.
-	  
 comment "LED drivers"
 
 config LEDS_88PM860X
