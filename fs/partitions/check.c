@@ -39,7 +39,6 @@
 #include "efi.h"
 #include "karma.h"
 #include "sysv68.h"
-#include "rpmb.h"
 
 #ifdef CONFIG_BLK_DEV_MD
 extern void md_autodetect_dev(dev_t dev);
@@ -54,14 +53,6 @@ static int (*check_part[])(struct parsed_partitions *) = {
 	 */
 #ifdef CONFIG_BLKDEV_PARTITION
 	blkdev_partition,
-#endif
-#ifdef CONFIG_RPMB_PARTITION
-	/*
-	 * Must be before any formats which have a partition table so that no
-	 * attempt is made to access replay protected memory block (RPMB)
-	 * partitions.
-	 */
-	rpmb_partition,
 #endif
 #ifdef CONFIG_ACORN_PARTITION_ICS
 	adfspart_check_ICS,

@@ -268,10 +268,3 @@ config SYSV68_PARTITION
 	  partition table format used by Motorola Delta machines (using
 	  sysv68).
 	  Otherwise, say N.
-
-config RPMB_PARTITION
-	bool "RPMB partition table support" if PARTITION_ADVANCED
-	default n
-	help
-	  Say Y if would like access to Replay Memory Block(RPMB) on MMC
-	  Otherwise, say N.
