@@ -21,21 +21,6 @@
 
 #include <linux/battery/sec_charging_common.h>
 
-#if defined(CONFIG_CHARGER_DUMMY)
-#include <linux/battery/charger/dummy_charger.h>
-#elif defined(CONFIG_CHARGER_MAX8903)
-#include <linux/battery/charger/max8903_charger.h>
-#elif defined(CONFIG_CHARGER_SMB328)
-#include <linux/battery/charger/smb328_charger.h>
-#elif defined(CONFIG_CHARGER_SMB347)
-#include <linux/battery/charger/smb347_charger.h>
-#elif defined(CONFIG_CHARGER_BQ24157)
-#include <linux/battery/charger/bq24157_charger.h>
-#elif defined(CONFIG_CHARGER_BQ24190) || \
-		defined(CONFIG_CHARGER_BQ24191)
-#include <linux/battery/charger/bq24190_charger.h>
-#endif
-
 static enum power_supply_property sec_charger_props[] = {
 	POWER_SUPPLY_PROP_STATUS,
 	POWER_SUPPLY_PROP_HEALTH,
